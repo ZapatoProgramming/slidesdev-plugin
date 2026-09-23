@@ -12,7 +12,7 @@
   "keywords": ["slidev", "slides", "presentation", "presentations", "deck", "markdown", "agents-md"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Slides (Slidev)",
+    "displayName": "Slides para Slidev",
     "shortDescription": "Presentaciones Slidev a tu gusto",
     "longDescription": "Genera presentaciones Slidev (slides.md + package.json) en el directorio de trabajo y las edita con lenguaje natural. Lee tus preferencias de estilo desde AGENTS.md (proyecto, luego global) y las crea con unas pocas preguntas si aún no existen.",
     "developerName": "ZapatoProgramming",

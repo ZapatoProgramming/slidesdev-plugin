@@ -2,6 +2,10 @@
 
 Quick reference for writing and editing `slides.md`. Full docs: https://sli.dev
 
+> Based on the [Slidev documentation](https://sli.dev)
+> ([source](https://github.com/slidevjs/slidev/tree/main/docs)),
+> MIT License, Copyright (c) 2020-PRESENT Anthony Fu.
+
 ## File anatomy
 
 ```md

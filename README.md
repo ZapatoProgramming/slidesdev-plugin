@@ -287,6 +287,26 @@ Los usuarios reciben la versión nueva al actualizar el marketplace.
 
 Issues y PRs bienvenidos — lee [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Créditos
+
+Este plugin es solo una capa sobre **[Slidev](https://sli.dev)**, creado por
+[Anthony Fu](https://github.com/antfu) y
+[sus colaboradores](https://github.com/slidevjs/slidev/graphs/contributors)
+bajo licencia MIT. Slidev hace todo el trabajo de verdad: render, temas,
+animaciones y exportación. El plugin solo escribe el `slides.md`.
+
+- Documentación: [sli.dev](https://sli.dev) · Código: [slidevjs/slidev](https://github.com/slidevjs/slidev)
+- Si Slidev te sirve, considera [apoyar a su autor](https://github.com/sponsors/antfu).
+- [`slidev-cheatsheet.md`](skills/slides-create/references/slidev-cheatsheet.md)
+  está basado en la documentación oficial de Slidev.
+
+> **Proyecto no oficial.** Este plugin no está afiliado, patrocinado ni
+> respaldado por Slidev ni por sus autores. "Slidev" se usa solo para indicar
+> con qué herramienta funciona.
+
+Dependencias de terceros y sus licencias: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Licencia
 
-[MIT](LICENSE)
+[MIT](LICENSE) — cubre el código de este repositorio, no el de Slidev ni el
+de otras dependencias.
