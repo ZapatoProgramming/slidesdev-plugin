@@ -1,7 +1,7 @@
 # Contribuir
 
 ¡Gracias por ayudar! Este plugin es casi todo Markdown: los skills en
-`skills/*/SKILL.md` son las instrucciones que siguen Claude Code y Codex.
+`skills/*/SKILL.md` son las instrucciones que siguen Claude Code, Codex, Antigravity y OpenCode.
 
 1. Haz fork y clona el repo.
 2. Instálalo en modo desarrollo (ver [README → Probar el plugin en modo desarrollo](README.md#probar-el-plugin-en-modo-desarrollo)).
@@ -14,9 +14,10 @@
      `skills/slides-create/references/slidev-cheatsheet.md`.
    - No añadas nada específico de un solo agente a los skills; lo específico
      de Claude va en `commands/` o `.claude-plugin/`, lo de Codex en
-     `.codex-plugin/`.
+     `.codex-plugin/`, lo de Antigravity en `plugin.json` y lo de OpenCode en
+     `.opencode/`.
 4. Ejecuta `node scripts/validate.mjs`.
-5. Prueba el flujo en **ambos** agentes si tocas un skill.
+5. Si tocas un skill, prueba el flujo en todos los agentes que puedas.
 6. Añade una línea en `CHANGELOG.md` bajo `[Unreleased]` y abre el PR.
 
 Usamos [Conventional Commits](https://www.conventionalcommits.org/es/)

@@ -6,7 +6,7 @@ body:
     id: agent
     attributes:
       label: Agente
-      options: [Claude Code, Codex, Ambos]
+      options: [Claude Code, Codex, Antigravity, OpenCode, Varios]
     validations:
       required: true
   - type: input

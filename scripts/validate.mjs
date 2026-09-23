@@ -31,24 +31,41 @@ const claudePlugin = readJson('.claude-plugin/plugin.json')
 const claudeMarket = readJson('.claude-plugin/marketplace.json')
 const codexPlugin = readJson('.codex-plugin/plugin.json')
 const codexMarket = readJson('.agents/plugins/marketplace.json')
+const antigravityPlugin = readJson('plugin.json')
+const opencodePackage = readJson('package.json')
 
 const semver = /^\d+\.\d+\.\d+(-[\w.]+)?$/
 let version = null
 
-if (claudePlugin && codexPlugin) {
-  if (claudePlugin.name !== codexPlugin.name) {
-    fail(`plugin name differs: claude "${claudePlugin.name}" vs codex "${codexPlugin.name}"`)
-  }
-  if (claudePlugin.version !== codexPlugin.version) {
-    fail(`plugin version differs: claude ${claudePlugin.version} vs codex ${codexPlugin.version}`)
-  }
+if (claudePlugin) {
   if (!semver.test(claudePlugin.version ?? '')) {
     fail(`.claude-plugin/plugin.json: version "${claudePlugin.version}" is not SemVer`)
   }
   version = claudePlugin.version
-  if (codexPlugin.skills !== './skills/') {
-    fail('.codex-plugin/plugin.json: "skills" must be "./skills/"')
+  for (const [file, manifest] of [
+    ['.codex-plugin/plugin.json', codexPlugin],
+    ['plugin.json', antigravityPlugin],
+    ['package.json', opencodePackage],
+  ]) {
+    if (!manifest) continue
+    if (manifest.name !== claudePlugin.name) {
+      fail(`${file}: name "${manifest.name}" differs from .claude-plugin/plugin.json "${claudePlugin.name}"`)
+    }
+    if (manifest.version !== version) {
+      fail(`${file}: version ${manifest.version} differs from .claude-plugin/plugin.json ${version}`)
+    }
   }
+}
+
+if (codexPlugin && codexPlugin.skills !== './skills/') {
+  fail('.codex-plugin/plugin.json: "skills" must be "./skills/"')
+}
+
+if (opencodePackage) {
+  const main = opencodePackage.main
+  if (!main || !existsSync(join(root, main))) fail(`package.json: "main" → ${main} does not exist`)
+  if (opencodePackage.type !== 'module') fail('package.json: "type" must be "module"')
+  if (!existsSync(join(root, 'index.js'))) fail('index.js: missing (OpenCode V2 directory entry)')
 }
 
 const pluginName = claudePlugin?.name

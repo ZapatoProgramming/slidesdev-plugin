@@ -1,0 +1,12 @@
+{
+  "name": "slides",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias guardadas en AGENTS.md.",
+  "type": "module",
+  "main": ".opencode/plugins/slides.js",
+  "homepage": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+  "repository": "github:ZapatoProgramming/slidesdev-plugin",
+  "license": "MIT",
+  "keywords": ["opencode-plugin", "slidev", "slides", "presentations", "agents-md"]
+}

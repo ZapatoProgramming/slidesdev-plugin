@@ -1,0 +1,13 @@
+{
+  "name": "slides",
+  "version": "0.1.0",
+  "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias guardadas en AGENTS.md.",
+  "author": {
+    "name": "ZapatoProgramming",
+    "url": "https://github.com/ZapatoProgramming"
+  },
+  "homepage": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+  "repository": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+  "license": "MIT",
+  "keywords": ["slidev", "slides", "presentations", "markdown", "agents-md"]
+}

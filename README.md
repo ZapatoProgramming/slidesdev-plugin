@@ -1,6 +1,6 @@
-# slides — presentaciones Slidev desde Claude Code y Codex
+# slides — presentaciones Slidev desde Claude Code, Codex, Antigravity y OpenCode
 
-Plugin para **Claude Code** y **Codex** que crea presentaciones
+Plugin para **Claude Code**, **Codex**, **Antigravity** y **OpenCode** que crea presentaciones
 [Slidev](https://sli.dev) en la carpeta donde abras el agente y te deja
 editarlas hablando normal: *"haz más grande la animación de la diapo 3"*.
 
@@ -9,7 +9,7 @@ así cada presentación sale a tu estilo sin repetirlo.
 
 <!-- TODO: GIF de demo -->
 
-> **English:** Claude Code / Codex plugin that scaffolds and edits Slidev decks
+> **English:** Claude Code / Codex / Antigravity / OpenCode plugin that scaffolds and edits Slidev decks
 > in your working directory, following the style preferences stored in your
 > `AGENTS.md`. Install instructions below work the same; prompts can be in any
 > language.
@@ -18,7 +18,7 @@ así cada presentación sale a tu estilo sin repetirlo.
 
 ## Instalación
 
-**Requisitos:** Claude Code o Codex, y [Node.js](https://nodejs.org) ≥ 22.12
+**Requisitos:** Claude Code, Codex, Antigravity (`agy`) u OpenCode, y [Node.js](https://nodejs.org) ≥ 22.12
 para ver las presentaciones (lo pide Slidev).
 
 ### Claude Code
@@ -53,17 +53,45 @@ codex plugin marketplace upgrade slidesdev
 codex plugin remove slides@slidesdev && codex plugin add slides@slidesdev
 ```
 
+### Antigravity
+
+En la terminal:
+
+```bash
+agy plugin install https://github.com/ZapatoProgramming/slidesdev-plugin
+```
+
+Abre una sesión nueva de `agy`. Para actualizar, vuelve a correr el mismo
+comando; para quitarlo, `agy plugin uninstall slides`.
+
+### OpenCode
+
+Añade el plugin a tu `opencode.json` (global en `~/.config/opencode/` o el
+del proyecto):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["slides@git+https://github.com/ZapatoProgramming/slidesdev-plugin.git"]
+}
+```
+
+En OpenCode 2 (≥ 2.0.4) la clave es `"plugins"` en vez de `"plugin"`.
+Reinicia OpenCode. OpenCode puede dejar en caché el commit que resolvió la
+primera vez; para actualizar sin sorpresas, fija un tag al final y cámbialo
+cuando salga otra versión (`...slidesdev-plugin.git#v0.2.0`).
+
 ---
 
 ## Uso
 
-Abre Claude Code o Codex **en la carpeta donde quieras la presentación** y pídela:
+Abre tu agente **en la carpeta donde quieras la presentación** y pídela:
 
 ```text
 Hazme una presentación de 15 minutos sobre la arquitectura de este repo para el equipo nuevo
 ```
 
-En Claude Code también tienes un atajo:
+En Claude Code también tienes un atajo (en OpenCode es `/slides-new`):
 
 ```text
 /slides:new charla de 10 min sobre Docker para principiantes
@@ -158,6 +186,8 @@ dos copias activas:
 ```bash
 claude plugin uninstall slides@slidesdev
 codex plugin remove slides@slidesdev
+agy plugin uninstall slides
+# OpenCode: quita la línea del plugin de tu opencode.json
 ```
 
 ### 2a. Claude Code
@@ -197,6 +227,34 @@ cd playground && codex
   codex plugin remove slides@slidesdev && codex plugin add slides@slidesdev
   ```
 
+### 2c. Antigravity
+
+`agy` copia el plugin al instalarlo, así que instálalo desde tu copia local:
+
+```bash
+agy plugin validate .                # debe decir [ok] con 3 skills y 1 comando
+agy plugin install "$(pwd)"
+cd playground && agy
+```
+
+- **Tras editar un skill:** vuelve a correr `agy plugin install "$(pwd)"`
+  desde la raíz del repo y abre una sesión nueva.
+
+### 2d. OpenCode
+
+Apunta OpenCode a tu copia con un `opencode.json` dentro de `playground/`
+(ruta absoluta; OpenCode no expande `~`):
+
+```bash
+echo "{ \"plugin\": [\"$(pwd)\"] }" > playground/opencode.json
+cd playground
+opencode debug skill | grep '"name": "slides-'   # deben salir los 3 skills
+opencode
+```
+
+- **Tras editar un skill:** sal y vuelve a abrir `opencode`. Lee los skills
+  directo de tu copia, sin caché.
+
 ### 3. Qué probar
 
 Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
@@ -210,7 +268,8 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
 
-En Claude Code prueba también `/slides:new charla sobre testing`.
+En Claude Code prueba también `/slides:new charla sobre testing`, y en OpenCode
+`/slides-new charla sobre testing`.
 
 ### 4. Probar las preferencias globales
 
@@ -230,9 +289,11 @@ distintos (p. ej. idioma) y comprueba que gana el de `playground/AGENTS.md`.
 rm -rf playground && mkdir playground          # empezar de cero
 codex plugin remove slides@slidesdev             # quitar la versión de desarrollo de Codex
 codex plugin marketplace remove slidesdev
+agy plugin uninstall slides                      # quitar la versión de desarrollo de Antigravity
 ```
 
-En Claude Code con `--plugin-dir` no hay nada que limpiar.
+En Claude Code con `--plugin-dir` no hay nada que limpiar. En OpenCode basta
+con borrar `playground/` (el `opencode.json` vive ahí).
 
 ---
 
@@ -244,11 +305,14 @@ En Claude Code con `--plugin-dir` no hay nada que limpiar.
 .claude-plugin/          manifest y marketplace de Claude Code
 .codex-plugin/           manifest de Codex
 .agents/plugins/         marketplace de Codex
-skills/                  compartidos por ambos agentes
+plugin.json              manifest de Antigravity
+package.json, index.js   paquete del plugin de OpenCode
+.opencode/plugins/       adaptador de OpenCode (registra skills/ y /slides-new)
+skills/                  compartidos por todos los agentes
   slides-create/         crear presentación (+ references/ y assets/starter/)
   slides-edit/           editar slides existentes (auto-activación)
   slides-preferences/    leer/crear/actualizar AGENTS.md
-commands/new.md          /slides:new (solo Claude Code)
+commands/new.md          /slides:new (Claude Code; /slides-new en OpenCode)
 scripts/validate.mjs     chequeos estáticos (manifests, skills, links)
 ```
 
@@ -267,8 +331,9 @@ CI (`.github/workflows/ci.yml`) corre ambos en cada push y PR.
 
 ### Publicar una versión
 
-1. Sube `version` en `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
-   y la entrada de `.claude-plugin/marketplace.json` (SemVer).
+1. Sube `version` (SemVer) en `.claude-plugin/plugin.json`,
+   `.codex-plugin/plugin.json`, `plugin.json`, `package.json` y la entrada de
+   `.claude-plugin/marketplace.json`.
 2. Mueve lo de `[Unreleased]` en `CHANGELOG.md` a la nueva versión.
 3. `node scripts/validate.mjs`
 4. Commit, tag y release:
