@@ -1,0 +1,20 @@
+{
+  "name": "slidesdev",
+  "interface": {
+    "displayName": "Slidesdev"
+  },
+  "plugins": [
+    {
+      "name": "slides",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

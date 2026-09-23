@@ -1,0 +1,30 @@
+{
+  "name": "slides",
+  "version": "0.1.0",
+  "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias guardadas en AGENTS.md.",
+  "author": {
+    "name": "ZapatoProgramming",
+    "url": "https://github.com/ZapatoProgramming"
+  },
+  "homepage": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+  "repository": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+  "license": "MIT",
+  "keywords": ["slidev", "slides", "presentation", "presentations", "deck", "markdown", "agents-md"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Slides (Slidev)",
+    "shortDescription": "Presentaciones Slidev a tu gusto",
+    "longDescription": "Genera presentaciones Slidev (slides.md + package.json) en el directorio de trabajo y las edita con lenguaje natural. Lee tus preferencias de estilo desde AGENTS.md (proyecto, luego global) y las crea con unas pocas preguntas si aún no existen.",
+    "developerName": "ZapatoProgramming",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/ZapatoProgramming/slidesdev-plugin",
+    "defaultPrompt": [
+      "Hazme una presentación de 10 minutos sobre la arquitectura de este repo",
+      "Crea unas slides para explicar Docker a principiantes",
+      "Haz más grande la animación de la diapo 3"
+    ],
+    "brandColor": "#2B90B6",
+    "screenshots": []
+  }
+}

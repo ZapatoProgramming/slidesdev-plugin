@@ -1,0 +1,31 @@
+name: Bug
+description: Algo no funciona como esperabas
+labels: [bug]
+body:
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agente
+      options: [Claude Code, Codex, Ambos]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión del plugin
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Qué le pediste
+      description: El prompt exacto y, si aplica, tu sección `## Presentaciones` de AGENTS.md.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Qué pasó y qué esperabas
+    validations:
+      required: true

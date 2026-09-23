@@ -1,0 +1,17 @@
+{
+  "name": "slidesdev",
+  "description": "Marketplace del plugin slides: presentaciones Slidev desde Claude Code.",
+  "owner": {
+    "name": "ZapatoProgramming",
+    "url": "https://github.com/ZapatoProgramming"
+  },
+  "plugins": [
+    {
+      "name": "slides",
+      "source": "./",
+      "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias de AGENTS.md.",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}

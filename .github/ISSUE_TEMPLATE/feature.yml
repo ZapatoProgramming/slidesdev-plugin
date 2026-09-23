@@ -1,0 +1,15 @@
+name: Idea
+description: Propón una mejora
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: ¿Qué te gustaría poder hacer?
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Ejemplo de prompt
+      placeholder: "Haz que todas las slides de código usen magic-move"
