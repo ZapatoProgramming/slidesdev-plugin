@@ -158,7 +158,7 @@ Ejemplo:
 - **Densidad:** poco texto; máximo 4 bullets por slide
 - **Animaciones:** sutiles — `v-clicks` en listas y transición `fade`
 - **Código:** resaltado por pasos cuando haya más de 8 líneas
-- **Diagramas:** Mermaid para flujos
+- **Diagramas:** Mermaid para flujos, animados paso a paso
 - **Notas del presentador:** sí
 - **Estructura:** portada → agenda → contenido → resumen → preguntas
 - **Colores/fuentes de marca:** primario #2B90B6, fuente Inter

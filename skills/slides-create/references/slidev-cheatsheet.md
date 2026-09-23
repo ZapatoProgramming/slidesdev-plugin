@@ -174,6 +174,63 @@ export default defineMermaidSetup(() => ({
 }))
 ```
 
+## Animated diagrams
+
+A Mermaid block renders as one SVG, all at once; `v-click` cannot reveal its
+individual nodes. To animate a diagram, pick one of these:
+
+**A. Linear flow, up to ~5 nodes → HTML nodes with `v-click`.** Each click
+shows an arrow and the next node together (`v-after`). This one looks best.
+
+```html
+<div class="flex items-center justify-center gap-4 mt-16 text-xl">
+  <div class="px-5 py-3 rounded-lg border-2 border-teal-500">Cliente</div>
+  <div v-click class="text-3xl opacity-70">→</div>
+  <div v-after class="px-5 py-3 rounded-lg border-2 border-teal-500">API</div>
+  <div v-click class="text-3xl opacity-70">→</div>
+  <div v-after class="px-5 py-3 rounded-lg border-2 border-teal-500">Base de datos</div>
+</div>
+```
+
+For a stronger entrance, give each node `v-motion` with
+`:initial="{ y: 30, opacity: 0 }"` and `:click-N="{ y: 0, opacity: 1 }"`
+instead of `v-click`/`v-after`. Use `flex-col` for vertical flows.
+
+**B. Branches, cycles, sequence or state diagrams → Mermaid steps with
+`<v-switch>`.** Each step is the previous one plus the next nodes; one step
+is shown per click, and the last one is the complete diagram.
+
+`````md
+<v-switch>
+<template #1>
+
+```mermaid {scale: 0.8}
+flowchart LR
+  A[Pedido] --> B{¿Pagado?}
+```
+
+</template>
+<template #2>
+
+```mermaid {scale: 0.8}
+flowchart LR
+  A[Pedido] --> B{¿Pagado?}
+  B -->|sí| C[Enviar]
+  B -->|no| D[Recordatorio]
+```
+
+</template>
+</v-switch>
+`````
+
+- Blank lines around each code fence inside `<template>` are required.
+- Keep the same node IDs, labels, declaration order, direction and `scale`
+  in every step, so earlier nodes stay in place as new ones appear.
+- The first step appears on the first click. Put the slide's title or a
+  one-line lead above `<v-switch>` so the slide does not open empty.
+- The PDF export shows the last step, so that step must be the full diagram.
+- 2–4 steps is enough; group related nodes into one step.
+
 ## Math (KaTeX)
 
 Inline `$E = mc^2$`, block `$$ … $$`. **Formulas only render in Markdown

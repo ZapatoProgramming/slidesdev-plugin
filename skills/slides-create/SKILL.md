@@ -64,7 +64,13 @@ syntax. Work in two passes:
    - Vary layouts (`cover`, `section`, `two-cols`, `image-right`, `fact`,
      `center`, `end`) instead of bullet after bullet.
    - Animations according to preferences (none / `v-clicks` / `v-motion`).
-   - Code blocks with stepped highlighting, diagrams in Mermaid, when useful.
+   - Code blocks with stepped highlighting, when useful.
+   - Diagrams in Mermaid, when useful. **Animate them by default** whenever
+     the animation preference is anything but "ninguna" (or the diagram
+     preference asks for it): reveal the diagram step by step with clicks
+     using a pattern from "Animated diagrams" in the cheatsheet. Use a static
+     diagram only when animations are off, the preference says "estáticos",
+     or the user asks for it.
    - Speaker notes as the last `<!-- -->` comment of each slide, if preferred.
    - Images: never invent URLs. Use a placeholder
      (`<!-- TODO: imagen de … -->`) or files the user provided in `public/`.
@@ -91,6 +97,8 @@ differently from the screen. Design so the deck looks the same in both:
 - **Animations**: `v-motion` and `v-click` are fine; Slidev exports their final
   state. CSS `@keyframes` loops are captured mid-frame, so give components with
   CSS animations a static layout when `useNav().isPrintMode` is true.
+  Animated diagrams export as their last step, so that step must be the
+  complete diagram.
 - **Math only in Markdown context**: `$…$`/`$$…$$` are not rendered inside
   an HTML element on the same line (`<div>$x$</div>` shows the raw LaTeX).
   Close the HTML, leave a blank line, write the formula, leave a blank line

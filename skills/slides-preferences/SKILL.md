@@ -31,6 +31,7 @@ one message**, each with a suggested default so they can answer "ok":
 2. Tema Slidev (`default`, `seriph`, u otro de npm) y modo claro/oscuro.
 3. Tono (técnico / divulgativo / ejecutivo) y densidad de texto (poco texto, 3-5 bullets máx.).
 4. Animaciones: ninguna / sutiles (`v-click`, `fade`) / muchas (`v-motion`, transiciones).
+   Los diagramas se animan por pasos salvo que elija "ninguna" o pida diagramas estáticos.
 5. Colores o fuente de marca, si tiene.
 
 Then write the section using the template file above, filled with the answers,

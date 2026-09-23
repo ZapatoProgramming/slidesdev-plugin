@@ -12,6 +12,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - `validate.mjs` comprueba que el nombre y la versión de `plugin.json` y `package.json` coincidan con el resto de manifests.
 
 ### Changed
+- Los diagramas se animan por defecto (se revelan paso a paso con clicks) salvo que las animaciones estén desactivadas o se pidan estáticos. El cheatsheet incluye dos patrones: nodos HTML con `v-click` y pasos de Mermaid con `<v-switch>`. La plantilla de preferencias y la pregunta de animaciones lo reflejan.
 - `slides-create`/`slides-edit`: el deck se genera en el menor número de archivos posible.
 - Si el agente bloquea una escritura, el plugin se detiene y ofrece reintentar o pegar el contenido, sin rodeos por la terminal.
 - README: sección "Problemas comunes".

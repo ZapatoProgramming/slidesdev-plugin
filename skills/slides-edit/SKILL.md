@@ -40,6 +40,10 @@ for syntax. Guidelines:
 - Adding slides: insert with a proper `---` separator and follow the deck's
   existing layout/animation patterns.
 - Reordering: move whole slide blocks including their frontmatter and notes.
+- "Anima el diagrama" / "que el diagrama aparezca por pasos": convert the
+  static Mermaid block to a pattern from "Animated diagrams" in the
+  cheatsheet, keeping its nodes, labels and theme. New diagrams follow the
+  animation rule in [`../slides-create/SKILL.md`](../slides-create/SKILL.md).
 - Theme change: update headmatter `theme:` **and** add the theme package to
   `package.json`; tell the user to run `npm install`.
 - New images: never invent URLs; use files in `public/` or leave a TODO.
