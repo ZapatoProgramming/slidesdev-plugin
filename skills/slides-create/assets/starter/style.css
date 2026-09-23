@@ -1,0 +1,5 @@
+/* Slidev < 52.15 + fuse.js >= 7.2: la lista de Goto se ve aunque el diálogo esté cerrado.
+   Conserva este bloque al reescribir style.css. */
+#slidev-goto-dialog:has(#slidev-goto-input:disabled) .autocomplete-list {
+  display: none;
+}

@@ -16,6 +16,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - Codex: el nombre visible pasa de "Slides (Slidev)" a "Slides para Slidev", para que no parezca un plugin oficial.
 
 ### Fixed
+- La lista de diapositivas del diálogo Goto ya no se queda fija tapando el contenido (Slidev < 52.15 con fuse.js ≥ 7.2): el starter incluye `style.css` con un parche y `slides-edit` tiene una sección "Known issues" para no confundirla con contenido del deck.
+- Las diapositivas con título en HTML ya no salen como "undefined" en el índice y en el modo presentador: `slides-create` pide `title:` en su frontmatter.
 - Las presentaciones se ven igual al exportar a PDF: reglas en `slides-create` para evitar glows con `box-shadow`/`blur`, texto con gradiente y diagramas que no caben; tema de Mermaid con `setup/mermaid.ts`.
 - Las fórmulas KaTeX ya no salen en crudo: el cheatsheet explica cómo escribirlas dentro de HTML (línea en blanco antes y después) y cómo darles color.
 

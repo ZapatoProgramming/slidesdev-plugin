@@ -32,7 +32,11 @@ create the new deck in a subfolder (e.g. `./<slug>/`), or edit the existing one
 
 Otherwise copy the starter from this skill's folder:
 `assets/starter/` (sibling of this SKILL.md) → the target folder. It contains
-`package.json`, `slides.md`, `.gitignore`, `components/` and `public/`.
+`package.json`, `slides.md`, `style.css`, `.gitignore`, `components/` and
+`public/`. `style.css` holds a workaround for a Slidev bug (a slide list stuck
+on screen, see "Known issues" in
+[`../slides-edit/SKILL.md`](../slides-edit/SKILL.md)): copy it as is, and
+whenever you rewrite `style.css` keep that block.
 Do not overwrite an existing `package.json` or `.gitignore`; if one exists,
 merge the Slidev dependencies and scripts into it instead and tell the user.
 
@@ -53,6 +57,10 @@ syntax. Work in two passes:
    - Headmatter with `theme`, `title`, `colorSchema`, `transition`, `mdc: true`
      and fonts from preferences.
    - One idea per slide; respect the text-density preference.
+   - Every slide needs a title Slidev can read: the first `#` heading. If the
+     visible title is HTML (`<h1>`, `<div>`…) or there is no `#`, add
+     `title: …` to that slide's frontmatter; otherwise it shows as
+     "undefined" in the slide index (`g`) and in presenter mode.
    - Vary layouts (`cover`, `section`, `two-cols`, `image-right`, `fact`,
      `center`, `end`) instead of bullet after bullet.
    - Animations according to preferences (none / `v-clicks` / `v-motion`).
@@ -92,8 +100,9 @@ To check the export, look at the PDF itself: `--format png` screenshots the
 screen rendering and does **not** reproduce the PDF-only bugs above.
 
 **Keep the deck in as few files as possible.** Put everything in `slides.md`
-by default: style with UnoCSS classes and per-slide `<style>` blocks. Create
-`style.css` only for styles repeated across many slides, and a
+by default: style with UnoCSS classes and per-slide `<style>` blocks. Add to
+`style.css` only styles repeated across many slides (keeping its Goto
+workaround block), and create a
 `components/*.vue` file only for something Markdown + UnoCSS cannot do (e.g. a
 custom animated background). Every extra file is one more write that can be
 blocked (see "If a write is blocked" below).

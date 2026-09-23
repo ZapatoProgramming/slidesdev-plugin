@@ -55,6 +55,25 @@ for syntax. Guidelines:
   [`../slides-create/SKILL.md`](../slides-create/SKILL.md): no retries, no
   shell workarounds; tell the user and offer to paste the change.
 
+## Known issues
+
+Not every problem the user reports is in the deck. Rule these out **before**
+touching `slides.md`:
+
+- **"Un menú / lista de diapositivas que no se quita y tapa todo"** (top right,
+  entries like "1 Título", "2 undefined"). This is Slidev's Goto dialog
+  (`#slidev-goto-dialog`), not deck content: do not delete slides or blocks
+  to fix it. It happens with `@slidev/client` < 52.15 plus fuse.js ≥ 7.2,
+  where an empty search returns every slide. Fix:
+  1. Check `node_modules/@slidev/client/package.json` → `version`. If it is
+     below 52.15, suggest `npm install @slidev/cli@latest` (Slidev 53 needs
+     Node ≥ 22.12).
+  2. Make sure `style.css` contains the workaround block from
+     [`../slides-create/assets/starter/style.css`](../slides-create/assets/starter/style.css);
+     add it if missing (it keeps `g` working).
+- **Slides titled "undefined"** in that list or in presenter mode: the slide
+  has no `#` heading (its title is HTML). Add `title: …` to its frontmatter.
+
 ## 4. Reply
 
 One or two lines: which slide(s) changed and how. If a dev server is running
