@@ -76,10 +76,10 @@ del proyecto):
 }
 ```
 
-En OpenCode 2 (≥ 2.0.4) la clave es `"plugins"` en vez de `"plugin"`.
-Reinicia OpenCode. OpenCode puede dejar en caché el commit que resolvió la
-primera vez; para actualizar sin sorpresas, fija un tag al final y cámbialo
-cuando salga otra versión (`...slidesdev-plugin.git#v0.2.0`).
+La clave es `"plugin"`, en singular: OpenCode ignora `"plugins"` sin dar
+error. Reinicia OpenCode. Se queda en caché el commit que resolvió la primera
+vez; para actualizar, borra
+`~/.cache/opencode/packages/slides@git+https:` y reinicia.
 
 ---
 
@@ -306,7 +306,7 @@ con borrar `playground/` (el `opencode.json` vive ahí).
 .codex-plugin/           manifest de Codex
 .agents/plugins/         marketplace de Codex
 plugin.json              manifest de Antigravity
-package.json, index.js   paquete del plugin de OpenCode
+package.json             paquete del plugin de OpenCode
 .opencode/plugins/       adaptador de OpenCode (registra skills/ y /slides-new)
 skills/                  compartidos por todos los agentes
   slides-create/         crear presentación (+ references/ y assets/starter/)

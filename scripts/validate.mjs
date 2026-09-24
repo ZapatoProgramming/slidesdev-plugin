@@ -65,7 +65,6 @@ if (opencodePackage) {
   const main = opencodePackage.main
   if (!main || !existsSync(join(root, main))) fail(`package.json: "main" → ${main} does not exist`)
   if (opencodePackage.type !== 'module') fail('package.json: "type" must be "module"')
-  if (!existsSync(join(root, 'index.js'))) fail('index.js: missing (OpenCode V2 directory entry)')
 }
 
 const pluginName = claudePlugin?.name

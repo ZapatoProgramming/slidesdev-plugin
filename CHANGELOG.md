@@ -8,7 +8,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 - Soporte para Antigravity: `plugin.json` en la raíz; se instala con `agy plugin install <repo>`.
-- Soporte para OpenCode: plugin en `.opencode/plugins/slides.js` (con `package.json` e `index.js`) que registra los skills y el comando `/slides-new`.
+- Soporte para OpenCode (1.x): plugin en `.opencode/plugins/slides.js` (con `package.json`) que registra los skills y el comando `/slides-new`.
 - `validate.mjs` comprueba que el nombre y la versión de `plugin.json` y `package.json` coincidan con el resto de manifests.
 
 ### Changed
