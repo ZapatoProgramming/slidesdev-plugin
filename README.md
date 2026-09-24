@@ -76,8 +76,7 @@ del proyecto):
 }
 ```
 
-La clave es `"plugin"`, en singular: OpenCode ignora `"plugins"` sin dar
-error. Reinicia OpenCode. Se queda en caché el commit que resolvió la primera
+Reinicia OpenCode. Se queda en caché el commit que resolvió la primera
 vez; para actualizar, borra
 `~/.cache/opencode/packages/slides@git+https:` y reinicia.
 
