@@ -145,7 +145,7 @@ for (const name of skills) {
 // --- Starter template --------------------------------------------------------
 
 const starter = join(skillsDir, 'slides-create', 'assets', 'starter')
-for (const f of ['package.json', 'slides.md', 'style.css', '.gitignore']) {
+for (const f of ['package.json', 'slides.md', 'style.css', 'vite.config.ts', '.gitignore']) {
   if (!existsSync(join(starter, f))) fail(`starter template: missing ${f}`)
 }
 readJson('skills/slides-create/assets/starter/package.json')

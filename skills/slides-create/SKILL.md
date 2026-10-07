@@ -32,13 +32,16 @@ create the new deck in a subfolder (e.g. `./<slug>/`), or edit the existing one
 
 Otherwise copy the starter from this skill's folder:
 `assets/starter/` (sibling of this SKILL.md) → the target folder. It contains
-`package.json`, `slides.md`, `style.css`, `.gitignore`, `components/` and
-`public/`. `style.css` holds a workaround for a Slidev bug (a slide list stuck
-on screen, see "Known issues" in
+`package.json`, `slides.md`, `style.css`, `vite.config.ts`, `.gitignore`,
+`components/` and `public/`. `style.css` holds a workaround for a Slidev bug (a
+slide list stuck on screen, see "Known issues" in
 [`../slides-edit/SKILL.md`](../slides-edit/SKILL.md)): copy it as is, and
-whenever you rewrite `style.css` keep that block.
-Do not overwrite an existing `package.json` or `.gitignore`; if one exists,
-merge the Slidev dependencies and scripts into it instead and tell the user.
+whenever you rewrite `style.css` keep that block. Copy `vite.config.ts` as is
+too: without it `npm run build` fails and `npm run export:html` does not
+exist.
+Do not overwrite an existing `package.json`, `.gitignore` or `vite.config.ts`;
+if one exists, merge the Slidev dependencies, scripts and Vite options into it
+instead and tell the user.
 
 Then adjust:
 - `package.json` → `name` (kebab-case of the title); add the theme package if
@@ -139,8 +142,14 @@ npm install        # la primera vez (requiere Node >= 22.12)
 npm run dev        # abre http://localhost:3030 con recarga en caliente
 npm run export     # exporta a PDF (slides-export.pdf)
                    # si falla por falta de Chromium: npx playwright install chromium
+npm run export:html  # un solo archivo, slides-export.html, que se abre con doble clic
 npm run build      # genera un sitio estático en dist/
 ```
+
+`slides-export.html` is the way to share the deck as it looks in `npm run dev`
+(animations included) with someone who has no Node: it opens from disk in any
+browser, with no server. Images in `public/` are embedded in the file; images
+loaded by URL still need internet.
 
 Mention they can now ask for changes in plain language ("cambia la diapo 4
 a dos columnas") without naming the plugin.

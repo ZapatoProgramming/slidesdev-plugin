@@ -283,7 +283,8 @@ the PDF:
 
 ## Assets & components
 
-- Files in `public/` are served from `/` → `![](/diagram.png)`.
+- Files in `public/` are served from `/` → `![](/diagram.png)`. They are
+  embedded in `npm run export:html`; images loaded by URL still need internet.
 - `.vue` files in `components/` are auto-imported: `<MiComponente />`.
 - Built-ins: `<Arrow x1 y1 x2 y2 />`, `<Tweet id="…"/>`, `<Youtube id="…"/>`,
   `<Toc />`, `<SlideCurrentNo />`, `<Transform :scale="0.8">`.
@@ -296,4 +297,7 @@ the PDF:
   If it fails because Chromium is missing (newer npm blocks install scripts),
   suggest `npx playwright install chromium` once.
   `npm run export -- --format pptx` or `--format png` for other formats.
+- `npm run export:html` — `slides-export.html`, a single file that opens with a
+  double click (no server, no Node) and keeps animations. Needs
+  `vite.config.ts` and `vite-plugin-singlefile` from the starter.
 - `npm run build` — static SPA in `dist/` for hosting.

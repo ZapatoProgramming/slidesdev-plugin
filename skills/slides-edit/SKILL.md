@@ -1,6 +1,6 @@
 ---
 name: slides-edit
-description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda").
+description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides, or to export or share it ("pásamela en un HTML que se abra con doble clic") — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda").
 ---
 
 # Edit a Slidev presentation
@@ -77,6 +77,36 @@ touching `slides.md`:
      add it if missing (it keeps `g` working).
 - **Slides titled "undefined"** in that list or in presenter mode: the slide
   has no `#` heading (its title is HTML). Add `title: …` to its frontmatter.
+- **`npm run build` fails with `[lightningcss minify] Invalid token in pseudo
+  element`**: a Slidev 53 + Vite 8 bug in Slidev's own CSS, not in the deck.
+  Copy [`../slides-create/assets/starter/vite.config.ts`](../slides-create/assets/starter/vite.config.ts)
+  into the deck (it sets `build.cssMinify: false`); if the deck already has a
+  `vite.config.ts`, add that option to it instead.
+
+## Sharing the deck
+
+When the user wants to send the deck to someone ("pásamela en un archivo",
+"que la puedan abrir en otra compu", "expórtala a HTML"), suggest
+`npm run export:html`. It writes `slides-export.html`, one file that opens
+with a double click in any browser, without Node or a server, and keeps the
+animations. It works offline; Google fonts then fall back to a system font. `npm run export` (PDF/PPTX) loses them, and `npm run build` makes
+a site that needs hosting.
+
+Decks created before this command existed have no `export:html` script in
+`package.json`. To add it:
+
+1. Copy [`../slides-create/assets/starter/vite.config.ts`](../slides-create/assets/starter/vite.config.ts)
+   into the deck. If the deck already has a `vite.config.ts`, show the user
+   the difference and merge instead of overwriting.
+2. From [`../slides-create/assets/starter/package.json`](../slides-create/assets/starter/package.json),
+   add the `export:html` script and the `vite-plugin-singlefile`
+   devDependency.
+3. If `@slidev/cli` is older than the starter's (`^53.0.0`), raise it to that
+   version: the script needs `--router-mode`.
+4. Tell the user to run `npm install`, then `npm run export:html`.
+
+Images in `public/` are embedded in the file; images loaded by URL still need
+internet. Do not run the export yourself unless asked.
 
 ## 4. Reply
 

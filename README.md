@@ -99,20 +99,39 @@ En Claude Code también tienes un atajo (en OpenCode es `/slides-new`):
 El plugin:
 
 1. Lee tus preferencias de `AGENTS.md` (o te hace ≤ 5 preguntas y las guarda).
-2. Crea `slides.md`, `package.json`, `.gitignore`, `components/` y `public/`.
+2. Crea `slides.md`, `package.json`, `vite.config.ts`, `.gitignore`, `components/` y `public/`.
 3. Te dice qué comandos correr (no los ejecuta por ti):
 
 ```bash
 npm install      # la primera vez
 npm run dev      # http://localhost:3030 con recarga en caliente
 npm run export   # PDF  (--format pptx | png para otros formatos)
+npm run export:html  # un solo archivo HTML que se abre con doble clic
 npm run build    # sitio estático en dist/
 ```
+
+### Compartir la presentación
+
+`npm run export:html` genera `slides-export.html`: un único archivo que se ve
+igual que en `npm run dev`, con animaciones y transiciones, y que cualquiera
+abre con doble clic en su navegador, sin Node, sin servidor y sin internet.
+Las imágenes de `public/` van dentro del archivo, y las fuentes de Google
+necesitan conexión (sin ella se usa una fuente del sistema).
+
+Si prefieres un enlace, sube la carpeta `dist/` de `npm run build` a cualquier
+hosting estático. El PDF (`npm run export`) abre en todos lados, pero pierde
+las animaciones.
 
 ### Problemas comunes
 
 - **`npm run export` sin Chromium:** npm ≥ 11 bloquea los scripts de
   instalación; ejecuta una vez `npx playwright install chromium`.
+- **`npm run build` falla con `lightningcss minify: Invalid token`:** es un
+  bug de Slidev 53 con Vite 8. Las presentaciones nuevas traen un
+  `vite.config.ts` que lo evita; en una creada antes, pide *"arregla el
+  build"* o copia ese archivo del starter.
+- **Una presentación vieja no tiene `npm run export:html`:** pide *"quiero
+  compartirla como un HTML"* y el agente añade lo que falta.
 - **Escritura bloqueada ("auto mode classifier gave no verdict" o similar):**
   es el control de permisos del agente, no del plugin. El plugin no intenta
   esquivarlo: se detiene, te dice qué archivo faltó y te ofrece reintentar o
@@ -266,6 +285,7 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 4 | *"Pon la diapo 3 a dos columnas"* | Usa `layout: two-cols` con `::right::` |
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
+| 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic | Se ve como en `npm run dev`, con animaciones e imágenes, sin servidor |
 
 En Claude Code prueba también `/slides:new charla sobre testing`, y en OpenCode
 `/slides-new charla sobre testing`.
