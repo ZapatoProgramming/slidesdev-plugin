@@ -150,6 +150,23 @@ activa el skill de edición solo:
 
 Si `npm run dev` está corriendo, los cambios se ven al instante.
 
+### Figma (opcional)
+
+Si tu agente tiene conectado el MCP de Figma y le pasas el link de un frame,
+el plugin puede traer de ahí:
+
+- colores y fuentes de marca (las variables del archivo),
+- logos, íconos e imágenes, que guarda en `public/`,
+- el diseño de una slide hecha en Figma, rehecho en Markdown + UnoCSS.
+
+```text
+Hazme una presentación del lanzamiento con los colores y el logo de este Figma: https://www.figma.com/design/…?node-id=12-34
+```
+
+El resultado sigue siendo una presentación Slidev: Figma es solo de dónde
+saca las cosas. Para no consultarlo cada vez, te ofrece guardar los colores
+y el link en tu `AGENTS.md`. Sin Figma todo funciona igual.
+
 ---
 
 ## Preferencias (`AGENTS.md`)
@@ -286,6 +303,8 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
 | 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic | Se ve como en `npm run dev`, con animaciones e imágenes, sin servidor |
+| 8 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
+| 9 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
 
 En Claude Code prueba también `/slides:new charla sobre testing`, y en OpenCode
 `/slides-new charla sobre testing`.

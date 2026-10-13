@@ -1,6 +1,6 @@
 ---
 name: slides-edit
-description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides, or to export or share it ("pásamela en un HTML que se abra con doble clic") — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda").
+description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides, or to export or share it ("pásamela en un HTML que se abra con doble clic") — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda", "pon el logo de este Figma en la portada").
 ---
 
 # Edit a Slidev presentation
@@ -47,6 +47,10 @@ for syntax. Guidelines:
 - Theme change: update headmatter `theme:` **and** add the theme package to
   `package.json`; tell the user to run `npm install`.
 - New images: never invent URLs; use files in `public/` or leave a TODO.
+- Requests that point to Figma ("usa los colores de este Figma", "que la
+  diapo 4 quede como este frame"), when Figma MCP tools are available: follow
+  [`../slides-create/references/figma.md`](../slides-create/references/figma.md).
+  The change still lands in `slides.md` and `public/`.
 - If the request is a lasting style preference ("siempre quiero…"), also
   update AGENTS.md via slides-preferences.
 - New styles, diagrams and formulas must follow "Must survive `npm run

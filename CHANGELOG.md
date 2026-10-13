@@ -7,6 +7,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Added
+- Integración opcional con Figma: si el agente tiene el MCP de Figma y el usuario comparte un link (o lo guarda en `AGENTS.md`), `slides-create` y `slides-edit` traen colores y fuentes de marca, logos e imágenes (a `public/`) y layouts de slides desde Figma. La presentación sigue siendo Slidev. Nuevo `references/figma.md`; la pregunta de marca en `slides-preferences` acepta un link de Figma y la plantilla tiene la línea **Figma:**.
 - `npm run export:html`: exporta la presentación a `slides-export.html`, un único archivo que se abre con doble clic en cualquier navegador (sin servidor ni Node) y conserva animaciones, transiciones, Mermaid y las imágenes de `public/`. El starter incluye `vite.config.ts` y la dependencia `vite-plugin-singlefile`; `slides-edit` sabe añadirlo a presentaciones creadas antes.
 - Soporte para Antigravity: `plugin.json` en la raíz; se instala con `agy plugin install <repo>`.
 - Soporte para OpenCode (1.x): plugin en `.opencode/plugins/slides.js` (con `package.json`) que registra los skills y el comando `/slides-new`.

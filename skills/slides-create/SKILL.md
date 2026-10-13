@@ -1,6 +1,6 @@
 ---
 name: slides-create
-description: Create a new Slidev presentation (slides.md + package.json) in the current working directory, following the user's preferences from AGENTS.md. Use when the user asks to make, create, generate or draft a presentation, slides, deck or talk ("hazme una presentación sobre…", "crea unas slides de…", "prepara una charla de 10 minutos", "make a deck about…"). For changes to an existing slides.md use slides-edit instead.
+description: Create a new Slidev presentation (slides.md + package.json) in the current working directory, following the user's preferences from AGENTS.md. Use when the user asks to make, create, generate or draft a presentation, slides, deck or talk ("hazme una presentación sobre…", "crea unas slides de…", "prepara una charla de 10 minutos", "make a deck about…"), including when they share a figma.com link for its colors, images or layout ("hazme una presentación con los colores de este Figma"). For changes to an existing slides.md use slides-edit instead.
 ---
 
 # Create a Slidev presentation
@@ -23,6 +23,11 @@ minute of talk, plus cover and closing.
 
 If the deck is about the current repository, read the relevant code/docs first
 so the content is accurate, and cite real file names.
+
+If Figma MCP tools are available and the user shares a `figma.com` link (or
+the **Figma:** preference has one), read
+[`references/figma.md`](references/figma.md) to bring brand colors, fonts,
+images or a slide layout into the deck.
 
 ## 3. Scaffold the project
 
@@ -76,7 +81,9 @@ syntax. Work in two passes:
      or the user asks for it.
    - Speaker notes as the last `<!-- -->` comment of each slide, if preferred.
    - Images: never invent URLs. Use a placeholder
-     (`<!-- TODO: imagen de … -->`) or files the user provided in `public/`.
+     (`<!-- TODO: imagen de … -->`), files the user provided in `public/`,
+     or assets downloaded there from Figma
+     ([`references/figma.md`](references/figma.md)).
 
 For decks over ~25 slides, split sections into `pages/*.md` and import them
 with `src:`.

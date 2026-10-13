@@ -13,3 +13,4 @@ Preferencias para las presentaciones Slidev generadas por el plugin `slides`.
 - **Notas del presentador:** sí, 1-3 frases por slide
 - **Estructura:** portada → agenda → contenido → resumen → cierre/preguntas
 - **Colores/fuentes de marca:** ninguno
+- **Figma:** ninguno

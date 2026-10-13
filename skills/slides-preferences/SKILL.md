@@ -33,6 +33,10 @@ one message**, each with a suggested default so they can answer "ok":
 4. Animaciones: ninguna / sutiles (`v-click`, `fade`) / muchas (`v-motion`, transiciones).
    Los diagramas se animan por pasos salvo que elija "ninguna" o pida diagramas estáticos.
 5. Colores o fuente de marca, si tiene.
+   If Figma MCP tools are available, add "(o un link de Figma con ellos)".
+   With a link, read the values as in
+   [`../slides-create/references/figma.md`](../slides-create/references/figma.md)
+   and save them in **Colores/fuentes de marca:**, with the link in **Figma:**.
 
 Then write the section using the template file above, filled with the answers,
 and ask where to save it only if it is ambiguous:
