@@ -10,7 +10,7 @@
       "name": "slides-dev-plugin",
       "source": "./",
       "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias de AGENTS.md.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "productivity"
     }
   ],

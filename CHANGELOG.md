@@ -6,6 +6,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-14
+
 ### Added
 - Regla para cualquier cambio a los exports, en `slides-edit` y `CONTRIBUTING.md`: cada slide llena la ventana y se avanza de a una; se comprueba en teléfono horizontal, vertical y escritorio, y `slides-export.html` con JavaScript apagado y en WebKit, no solo en Chromium.
 - Prueba de regresión `tests/export-html.test.mjs`: genera `slides-export.html` de un deck mínimo y lo abre con JavaScript apagado en WebKit y Chromium (844×390 móvil y 1440×900) para comprobar que la slide llena la pantalla y que → avanza de a una.
