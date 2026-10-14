@@ -31,7 +31,9 @@ one message**, each with a suggested default so they can answer "ok":
 2. Tema Slidev (`default`, `seriph`, u otro de npm) y modo claro/oscuro.
 3. Tono (técnico / divulgativo / ejecutivo) y densidad de texto (poco texto, 3-5 bullets máx.).
 4. Animaciones: ninguna / sutiles (`v-click`, `fade`) / muchas (`v-motion`, transiciones).
-   Los diagramas se animan por pasos salvo que elija "ninguna" o pida diagramas estáticos.
+   Los diagramas se hacen con animación en loop (flechas que fluyen, un punto que
+   recorre el flujo) y se revelan por pasos, salvo que elija "ninguna" o pida
+   diagramas estáticos.
 5. Colores o fuente de marca, si tiene.
    If Figma MCP tools are available, add "(o un link de Figma con ellos)".
    With a link, read the values as in
@@ -55,3 +57,9 @@ When the user states a lasting preference ("de ahora en adelante…", "siempre�
 "from now on…"), edit the matching line of the section in place with a minimal
 edit. A one-off request for the current deck ("esta vez en inglés") is **not**
 a preference change — do not write it.
+
+Older versions of the template wrote **Diagramas:** `Mermaid cuando ayude a
+explicar un flujo; animados, se revelan paso a paso con clicks`. That line is
+the old default, not a choice of the user: follow the current diagram rule
+(loop diagrams first) and offer once to update the line to the one in the
+template.

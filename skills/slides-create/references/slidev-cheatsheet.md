@@ -110,6 +110,20 @@ Blank lines around the markdown inside `<v-clicks>` are required.
 `fade`, `fade-out`, `slide-left`, `slide-right`, `slide-up`, `slide-down`,
 `view-transition`. Different forward/back: `transition: slide-left | slide-right`.
 
+## Loops (CSS)
+
+Continuous motion is CSS only, so it keeps moving in `npm run export:ios`
+(iPhone). Never `setInterval` or `requestAnimationFrame` for it.
+
+- UnoCSS: `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`.
+  Slower or faster: `style="animation-duration: 4s"` on the element.
+- Custom: `@keyframes` in the slide's `<style>` and
+  `animation: nombre 2s linear infinite`.
+- `npm run export` draws them at rest (`animation: none`, from `style.css`):
+  the base style must be the complete picture. Things that only exist while
+  moving start at `opacity: 0` and their keyframes fade them in.
+- Loop diagrams: see "Diagrams".
+
 ## Styling
 
 - UnoCSS (Tailwind-compatible) classes work everywhere:
@@ -146,6 +160,134 @@ const b = 2
 
 ## Diagrams
 
+Diagrams loop by default: the motion shows how things flow, and CSS loops keep
+moving in `npm run export:ios` (iPhone). Pick by size:
+
+**A. Default — HTML/SVG with CSS loops.** Nodes are HTML boxes; each
+connector is a small inline SVG whose dashes flow, with a packet traveling
+along it. Each click shows an arrow and the next node together (`v-click` +
+`v-after`). Up to ~6 nodes; for vertical flows use `flex-col`, a vertical SVG
+(`viewBox="0 0 20 100"`, line from `10,0` to `10,88`) and `translateY` in the
+packet's keyframes.
+
+```html
+<div class="flujo">
+  <div class="nodo">Cliente</div>
+  <svg v-click class="flecha" viewBox="0 0 100 20"><line x1="0" y1="10" x2="88" y2="10" /><path d="M88 4 L100 10 L88 16 Z" /><circle class="paquete" cx="4" cy="10" r="5" /></svg>
+  <div v-after class="nodo">API</div>
+  <svg v-click class="flecha" viewBox="0 0 100 20"><line x1="0" y1="10" x2="88" y2="10" /><path d="M88 4 L100 10 L88 16 Z" /><circle class="paquete" cx="4" cy="10" r="5" /></svg>
+  <div v-after class="nodo">Base de datos</div>
+</div>
+
+<style>
+.flujo { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: 4rem; font-size: 1.25rem; }
+.nodo { padding: .75rem 1.25rem; border: 2px solid #14b8a6; border-radius: .5rem; }
+.flecha { width: 100px; height: 20px; overflow: visible; }
+.flecha line { stroke: #14b8a6; stroke-width: 3; stroke-dasharray: 8 6; animation: fluir .8s linear infinite; }
+.flecha path { fill: #14b8a6; }
+.flecha .paquete { fill: #fbbf24; opacity: 0; animation: viajar 1.6s ease-in-out infinite; }
+@keyframes fluir { to { stroke-dashoffset: -14; } }
+@keyframes viajar { 0% { transform: translateX(0); opacity: 0 } 15%, 85% { opacity: 1 } 100% { transform: translateX(80px); opacity: 0 } }
+</style>
+```
+
+Cycles (PDCA, lifecycles, loops of a process): the steps around a dashed ring
+that turns, carrying a dot. Keep the steps outside the ring so it never
+crosses their text.
+
+```html
+<div class="ciclo">
+  <div class="anillo"><span class="punto" /></div>
+  <div class="paso" style="left: 50%; top: 0">Planear</div>
+  <div class="paso" style="left: 100%; top: 50%">Hacer</div>
+  <div class="paso" style="left: 50%; top: 100%">Revisar</div>
+  <div class="paso" style="left: 0; top: 50%">Ajustar</div>
+</div>
+
+<style>
+.ciclo { position: relative; width: 300px; height: 300px; margin: 3rem auto 0; }
+.anillo { position: absolute; inset: 60px; border: 2px dashed #64748b; border-radius: 50%; animation: girar 6s linear infinite; }
+.punto { position: absolute; top: -8px; left: calc(50% - 8px); width: 16px; height: 16px; border-radius: 50%; background: #fbbf24; }
+.paso { position: absolute; transform: translate(-50%, -50%); padding: .4rem .9rem; border: 2px solid #14b8a6; border-radius: .5rem; white-space: nowrap; }
+@keyframes girar { to { transform: rotate(360deg); } }
+</style>
+```
+
+Building blocks to mix:
+
+- **Flowing line**: `stroke-dasharray: 8 6` and `@keyframes { to {
+  stroke-dashoffset: -14 } }`. The offset must equal dash + gap so the loop
+  has no jump.
+- **Traveling packet**: a `<circle>` with `opacity: 0` in its base style;
+  its keyframes move it along the arrow and fade it in and out.
+- **Active node**: `animate-pulse` on the node (it fades a little and back).
+- Use the deck's colors instead of the teal/amber above, and keep class
+  names unique per slide (`.flujo-auth`, `.flujo-pago`) when two slides
+  differ.
+
+**B. Big or special diagrams → Mermaid with animated edges.** More than ~6
+nodes, several branches or crossings, or a sequence, state, class, ER or
+Gantt diagram. Name each edge (`e1@-->`) and set `animate: true` so its dashes
+flow (Mermaid ≥ 11.6, bundled with Slidev 53):
+
+````md
+```mermaid {scale: 0.8}
+flowchart LR
+  A[Pedido] e1@--> B{¿Pagado?}
+  B e2@-->|sí| C[Enviar]
+  B e3@-->|no| D[Recordatorio]
+  D e4@--> B
+  e1@{ animate: true }
+  e2@{ animate: true }
+  e3@{ animate: true }
+  e4@{ animate: true }
+```
+````
+
+Mermaid draws inside a shadow root, so slide CSS cannot style or animate its
+parts: use Mermaid's own syntax (`animate`, `classDef`, `%%{init}%%`).
+
+To reveal it in steps, wrap it in `<v-switch>`: each step is the previous one
+plus the next nodes, one step is shown per click, and the last one is the
+complete diagram.
+
+`````md
+<v-switch>
+<template #1>
+
+```mermaid {scale: 0.8}
+flowchart LR
+  A[Pedido] e1@--> B{¿Pagado?}
+  e1@{ animate: true }
+```
+
+</template>
+<template #2>
+
+```mermaid {scale: 0.8}
+flowchart LR
+  A[Pedido] e1@--> B{¿Pagado?}
+  B e2@-->|sí| C[Enviar]
+  B e3@-->|no| D[Recordatorio]
+  e1@{ animate: true }
+  e2@{ animate: true }
+  e3@{ animate: true }
+```
+
+</template>
+</v-switch>
+`````
+
+- Blank lines around each code fence inside `<template>` are required.
+- Keep the same node IDs, labels, declaration order, direction and `scale`
+  in every step, so earlier nodes stay in place as new ones appear.
+- The first step appears on the first click. Put the slide's title or a
+  one-line lead above `<v-switch>` so the slide does not open empty.
+- The PDF export shows the last step, so that step must be the full diagram.
+- 2–4 steps is enough; group related nodes into one step.
+
+## Mermaid
+
 ````md
 ```mermaid {scale: 0.8}
 flowchart LR
@@ -173,63 +315,6 @@ export default defineMermaidSetup(() => ({
   },
 }))
 ```
-
-## Animated diagrams
-
-A Mermaid block renders as one SVG, all at once; `v-click` cannot reveal its
-individual nodes. To animate a diagram, pick one of these:
-
-**A. Linear flow, up to ~5 nodes → HTML nodes with `v-click`.** Each click
-shows an arrow and the next node together (`v-after`). This one looks best.
-
-```html
-<div class="flex items-center justify-center gap-4 mt-16 text-xl">
-  <div class="px-5 py-3 rounded-lg border-2 border-teal-500">Cliente</div>
-  <div v-click class="text-3xl opacity-70">→</div>
-  <div v-after class="px-5 py-3 rounded-lg border-2 border-teal-500">API</div>
-  <div v-click class="text-3xl opacity-70">→</div>
-  <div v-after class="px-5 py-3 rounded-lg border-2 border-teal-500">Base de datos</div>
-</div>
-```
-
-For a stronger entrance, give each node `v-motion` with
-`:initial="{ y: 30, opacity: 0 }"` and `:click-N="{ y: 0, opacity: 1 }"`
-instead of `v-click`/`v-after`. Use `flex-col` for vertical flows.
-
-**B. Branches, cycles, sequence or state diagrams → Mermaid steps with
-`<v-switch>`.** Each step is the previous one plus the next nodes; one step
-is shown per click, and the last one is the complete diagram.
-
-`````md
-<v-switch>
-<template #1>
-
-```mermaid {scale: 0.8}
-flowchart LR
-  A[Pedido] --> B{¿Pagado?}
-```
-
-</template>
-<template #2>
-
-```mermaid {scale: 0.8}
-flowchart LR
-  A[Pedido] --> B{¿Pagado?}
-  B -->|sí| C[Enviar]
-  B -->|no| D[Recordatorio]
-```
-
-</template>
-</v-switch>
-`````
-
-- Blank lines around each code fence inside `<template>` are required.
-- Keep the same node IDs, labels, declaration order, direction and `scale`
-  in every step, so earlier nodes stay in place as new ones appear.
-- The first step appears on the first click. Put the slide's title or a
-  one-line lead above `<v-switch>` so the slide does not open empty.
-- The PDF export shows the last step, so that step must be the full diagram.
-- 2–4 steps is enough; group related nodes into one step.
 
 ## Math (KaTeX)
 
@@ -267,7 +352,7 @@ the PDF:
 | `box-shadow: 0 0 40px rgba(…)` (glow) | radial-gradient glow (below) |
 | `filter: blur()` / `drop-shadow()` / `backdrop-filter` | nothing, or a gradient |
 | `background-clip: text` (gradient text) | solid `color` |
-| looping CSS `@keyframes` | static state when `useNav().isPrintMode` |
+| a loop whose base style is incomplete (it only looks right mid-animation) | base style = complete picture; `style.css` exports loops at rest |
 
 ```css
 /* glow that survives PDF export */
@@ -299,5 +384,10 @@ the PDF:
   `npm run export -- --format pptx` or `--format png` for other formats.
 - `npm run export:html` — `slides-export.html`, a single file that opens with a
   double click (no server, no Node) and keeps animations. Needs
-  `vite.config.ts` and `vite-plugin-singlefile` from the starter.
+  `vite.config.ts` and `vite-plugin-singlefile` from the starter. The
+  iPhone/iPad file preview shows it blank (it does not run JavaScript).
+- `npm run export:ios` — `slides-ios.html`, the deck as HTML + CSS without
+  JavaScript for the iPhone/iPad file preview: clicks revealed, CSS loops
+  moving, swipe between slides. Needs the starter's `vite.config.ts` and
+  Chromium (like `npm run export`).
 - `npm run build` — static SPA in `dist/` for hosting.

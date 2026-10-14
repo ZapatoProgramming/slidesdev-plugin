@@ -1,6 +1,6 @@
 ---
 name: slides-edit
-description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides, or to export or share it ("pásamela en un HTML que se abra con doble clic") — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda", "pon el logo de este Figma en la portada").
+description: Edit an existing Slidev presentation. Use whenever the working directory (or a folder the user mentions) contains a Slidev slides.md and the user asks to change anything in it — a slide's text, size, animation, layout, transition, theme, colors, images, code, diagrams, order, or to add/remove/split slides, or to export or share it ("pásamela en un HTML que se abra con doble clic", "quiero verla en el iPhone") — even if they never mention the plugin or Slidev ("haz más grande la animación de la diapo 3", "pon la slide de arquitectura a dos columnas", "quita la última diapositiva", "make the title on slide 2 bigger", "añade una slide sobre costos después de la agenda", "pon el logo de este Figma en la portada").
 ---
 
 # Edit a Slidev presentation
@@ -40,10 +40,16 @@ for syntax. Guidelines:
 - Adding slides: insert with a proper `---` separator and follow the deck's
   existing layout/animation patterns.
 - Reordering: move whole slide blocks including their frontmatter and notes.
-- "Anima el diagrama" / "que el diagrama aparezca por pasos": convert the
-  static Mermaid block to a pattern from "Animated diagrams" in the
-  cheatsheet, keeping its nodes, labels and theme. New diagrams follow the
-  animation rule in [`../slides-create/SKILL.md`](../slides-create/SKILL.md).
+- "Anima el diagrama" / "que el diagrama se mueva" / "que aparezca por
+  pasos": if it has up to ~6 nodes, redraw it as a loop diagram (pattern A in
+  "Diagrams" in the cheatsheet), keeping its nodes, labels and colors; if it
+  is bigger or a sequence/state/class/ER/Gantt diagram, keep Mermaid and add
+  animated edges and `<v-switch>` steps (pattern B). New diagrams follow the
+  diagram rule in [`../slides-create/SKILL.md`](../slides-create/SKILL.md).
+- New or changed animations follow "Animations: CSS first" in
+  [`../slides-create/SKILL.md`](../slides-create/SKILL.md): loops in CSS, and
+  a one-line warning before writing motion that needs JavaScript (it will
+  look still in `slides-ios.html`).
 - Theme change: update headmatter `theme:` **and** add the theme package to
   `package.json`; tell the user to run `npm install`.
 - New images: never invent URLs; use files in `public/` or leave a TODO.
@@ -86,6 +92,13 @@ touching `slides.md`:
   Copy [`../slides-create/assets/starter/vite.config.ts`](../slides-create/assets/starter/vite.config.ts)
   into the deck (it sets `build.cssMinify: false`); if the deck already has a
   `vite.config.ts`, add that option to it instead.
+- **"El HTML no se abre / sale en blanco en el iPhone"**: the iPhone/iPad file
+  preview does not run JavaScript, and `slides-export.html` needs it. Nothing
+  in the deck is wrong: suggest `npm run export:ios` (see "iPhone and iPad").
+- **Loops that come out mid-motion in the PDF** (a shape half faded or
+  turned): the deck's `style.css` lacks the block that exports loops at rest.
+  Add it from
+  [`../slides-create/assets/starter/style.css`](../slides-create/assets/starter/style.css).
 
 ## Sharing the deck
 
@@ -93,8 +106,10 @@ When the user wants to send the deck to someone ("pásamela en un archivo",
 "que la puedan abrir en otra compu", "expórtala a HTML"), suggest
 `npm run export:html`. It writes `slides-export.html`, one file that opens
 with a double click in any browser, without Node or a server, and keeps the
-animations. It works offline; Google fonts then fall back to a system font. `npm run export` (PDF/PPTX) loses them, and `npm run build` makes
-a site that needs hosting.
+animations. It works offline; Google fonts then fall back to a system font.
+It does not open in the iPhone/iPad file preview (see "iPhone and iPad"
+below). `npm run export` (PDF/PPTX) loses the animations, and `npm run build`
+makes a site that needs hosting.
 
 Decks created before this command existed have no `export:html` script in
 `package.json`. To add it:
@@ -111,6 +126,34 @@ Decks created before this command existed have no `export:html` script in
 
 Images in `public/` are embedded in the file; images loaded by URL still need
 internet. Do not run the export yourself unless asked.
+
+### iPhone and iPad
+
+The iPhone/iPad file preview (Files app, AirDrop) does not run
+JavaScript, so it shows `slides-export.html` blank. When the user wants to
+see or send the deck to an iPhone or iPad, suggest `npm run export:ios`. It
+writes `slides-ios.html`: every slide as HTML + CSS with its clicks revealed
+and its CSS loops moving; you swipe from one slide to the next. Motion made
+with JavaScript stays still there, and `v-motion` entrances show their final
+state.
+
+Decks created before this command existed have no `export:ios` script. To
+add it:
+
+1. Copy [`../slides-create/assets/starter/vite.config.ts`](../slides-create/assets/starter/vite.config.ts)
+   into the deck (merge if the deck has its own `vite.config.ts`, as above).
+2. From [`../slides-create/assets/starter/package.json`](../slides-create/assets/starter/package.json),
+   add the `export:ios` script, plus `export:html` and `vite-plugin-singlefile`
+   if they are missing.
+3. Add the loops-at-rest block from
+   [`../slides-create/assets/starter/style.css`](../slides-create/assets/starter/style.css)
+   to the deck's `style.css`, and `slides-ios.html` to its `.gitignore`.
+4. Check the deck's loops: any made with `setInterval` or
+   `requestAnimationFrame` will look still on the iPhone. Offer to rewrite
+   them in CSS. Components that switch to a static layout with
+   `useNav().isPrintMode` keep working as they are.
+5. Tell the user to run `npm install`, then `npm run export:ios`. If Chromium
+   is missing, `npx playwright install chromium` once.
 
 ## 4. Reply
 

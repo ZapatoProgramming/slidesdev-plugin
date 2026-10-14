@@ -4,11 +4,16 @@
 // - `npm run export:html` empaqueta la presentación en slides-export.html: un
 //   solo archivo, con las imágenes de public/ dentro, que se abre con doble
 //   clic en cualquier navegador, sin servidor.
+// - `npm run export:ios` genera slides-ios.html: la misma presentación como
+//   HTML + CSS, sin JavaScript, para la vista previa de archivos del iPhone
+//   (app Archivos, AirDrop), que no ejecuta JavaScript. Los clicks salen
+//   revelados, los loops de CSS siguen moviéndose y lo que dependa de
+//   JavaScript queda quieto.
 import type { Plugin, UserConfig } from 'vite'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { copyFile } from 'node:fs/promises'
+import { copyFile, writeFile } from 'node:fs/promises'
 import { extname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const MIME: Record<string, string> = {
   '.png': 'image/png',
@@ -25,8 +30,10 @@ const MIME: Record<string, string> = {
   '.woff2': 'font/woff2',
 }
 
-function singleFileHtml(): Plugin {
-  const deckRoot = fileURLToPath(new URL('.', import.meta.url))
+const deckRoot = fileURLToPath(new URL('.', import.meta.url))
+
+// `copyTo`: archivo de la presentación donde dejar el HTML final, si hace falta
+function singleFileHtml(copyTo?: string): Plugin {
   const uris = new Map<string, string>() // "img/foto.png" → data URI
   const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   let outDir = ''
@@ -81,19 +88,147 @@ function singleFileHtml(): Plugin {
     },
     async closeBundle() {
       const html = join(outDir, 'index.html')
-      if (existsSync(html))
-        await copyFile(html, join(deckRoot, 'slides-export.html'))
+      if (copyTo && existsSync(html))
+        await copyFile(html, join(deckRoot, copyTo))
+    },
+  }
+}
+
+// Código que corre dentro de la página. Va como texto porque el bundler de esta
+// configuración puede añadir a las funciones helpers que el navegador no tiene.
+const DECK_INFO = `(() => {
+  const slide = document.querySelector('.slidev-slide-content')
+  return {
+    slides: [...document.querySelectorAll('[data-slidev-no]')].map(el => +el.dataset.slidevNo),
+    width: Math.round(parseFloat(slide?.style.width) || 980),
+    height: Math.round(parseFloat(slide?.style.height) || 552),
+  }
+})()`
+
+const SLIDE_READY = `(() => {
+  const page = document.querySelector('#slideshow > .slidev-page:not([style*="display: none"])')
+  return !!page && !document.querySelector('.slidev-slide-loading')
+    && [...page.querySelectorAll('.mermaid')].every(m => m.shadowRoot?.querySelector('svg'))
+})()`
+
+const SLIDE_HTML = `(() => {
+  const content = document.querySelector('#slide-content')
+  for (const page of content.querySelectorAll('#slideshow > .slidev-page'))
+    if (page.style.display === 'none') page.remove()
+  // outerHTML no incluye los shadow roots, y Mermaid dibuja dentro de uno
+  const flatten = root => root.querySelectorAll('*').forEach((el) => {
+    if (el.shadowRoot) {
+      flatten(el.shadowRoot)
+      el.innerHTML = el.shadowRoot.innerHTML
+    }
+  })
+  flatten(content)
+  content.querySelectorAll('script').forEach(s => s.remove())
+  return content.outerHTML
+})()`
+
+const PAGE_HEAD = `({
+  attrs: [...document.documentElement.attributes].filter(a => a.name !== 'style').map(a => [a.name, a.value]),
+  title: document.title,
+  css: [...document.querySelectorAll('style')].map(s => s.textContent).join('\\n'),
+  links: [...document.querySelectorAll('link[rel="stylesheet"]')].map(l => l.outerHTML),
+})`
+
+const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+
+// Abre el build de un solo archivo en Chromium, recorre las slides en su último
+// click y guarda el DOM ya dibujado, sin scripts, en slides-ios.html
+function iosHtml(): Plugin {
+  let outDir = ''
+
+  return {
+    name: 'slides:ios-html',
+    enforce: 'post',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir)
+    },
+    async closeBundle() {
+      const index = join(outDir, 'index.html')
+      if (!existsSync(index))
+        return
+      const url = pathToFileURL(index).href
+      const { chromium } = await import('playwright-chromium')
+      const browser = await chromium.launch().catch((err: Error) => {
+        throw new Error(`[export:ios] no se pudo abrir Chromium; ejecuta una vez \`npx playwright install chromium\`.\n${err.message}`)
+      })
+      try {
+        // La vista de impresión lista todas las slides y su tamaño
+        const probe = await browser.newPage()
+        await probe.goto(`${url}?print=true#/print`)
+        await probe.waitForSelector('[data-slidev-no]')
+        const deck = await probe.evaluate(DECK_INFO)
+        await probe.goto(`${url}#/1`)
+        await probe.waitForSelector('#slide-content')
+        const head = await probe.evaluate(PAGE_HEAD)
+        await probe.close()
+
+        // Modo normal (no impresión), así los loops no se congelan. Un contexto
+        // por pestaña: Slidev sincroniza la slide actual entre pestañas.
+        const queue = [...deck.slides] as number[]
+        const slides = new Map<number, string>()
+        await Promise.all([1, 2, 3].map(async () => {
+          const context = await browser.newContext({ viewport: { width: deck.width, height: deck.height } })
+          const page = await context.newPage()
+          for (let no = queue.shift(); no !== undefined; no = queue.shift()) {
+            await page.goto('about:blank')
+            await page.goto(`${url}#/${no}?clicks=999999`)
+            await page.waitForFunction(SLIDE_READY, null, { timeout: 15_000 })
+              .catch(() => console.warn(`[export:ios] la slide ${no} tardó en cargar; se guarda como esté`))
+            await page.evaluate('document.fonts.ready.then(() => true)')
+            await page.waitForTimeout(1200) // que terminen las entradas de v-motion
+            slides.set(no, await page.evaluate(SLIDE_HTML))
+          }
+          await context.close()
+        }))
+
+        const attrs = (head.attrs as [string, string][]).map(([k, v]) => ` ${k}="${escapeHtml(v)}"`).join('')
+        const html = `<!doctype html>
+<html${attrs}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=${deck.width + 40}">
+<title>${escapeHtml(head.title)}</title>
+${head.links.join('\n')}
+<style>${head.css}</style>
+<style>
+html, body { height: auto !important; overflow: auto !important; margin: 0 !important; padding: 0 !important; background: #000 !important; -webkit-text-size-adjust: 100%; }
+html { scroll-snap-type: y mandatory; }
+.ios-slide { min-height: 100vh; box-sizing: border-box; padding: 20px 0; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; }
+.ios-slide > #slide-content { position: relative !important; left: auto !important; top: auto !important; transform: none !important; flex: none; overflow: hidden; }
+</style>
+</head>
+<body>
+${deck.slides.map((no: number) => `<section class="ios-slide">${slides.get(no) ?? ''}</section>`).join('\n')}
+</body>
+</html>
+`
+        await writeFile(join(deckRoot, 'slides-ios.html'), html)
+        console.log(`[export:ios] slides-ios.html: ${deck.slides.length} slides, ${(html.length / 1024 / 1024).toFixed(1)} MB`)
+      }
+      finally {
+        await browser.close()
+      }
     },
   }
 }
 
 // npm (y pnpm, yarn, bun) exponen el nombre del script en ejecución
-const singleFile = process.env.npm_lifecycle_event === 'export:html'
+const script = process.env.npm_lifecycle_event
+const singleFile = script === 'export:html' || script === 'export:ios'
 
 const config: UserConfig = {
   build: { cssMinify: false },
   plugins: singleFile
-    ? [singleFileHtml(), (await import('vite-plugin-singlefile')).viteSingleFile()]
+    ? [
+        singleFileHtml(script === 'export:html' ? 'slides-export.html' : undefined),
+        (await import('vite-plugin-singlefile')).viteSingleFile(),
+        ...(script === 'export:ios' ? [iosHtml()] : []),
+      ]
     : [],
 }
 

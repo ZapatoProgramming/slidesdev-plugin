@@ -3,4 +3,5 @@ dist
 .slidev
 *.local
 slides-export.*
+slides-ios.html
 .DS_Store

@@ -38,12 +38,12 @@ create the new deck in a subfolder (e.g. `./<slug>/`), or edit the existing one
 Otherwise copy the starter from this skill's folder:
 `assets/starter/` (sibling of this SKILL.md) → the target folder. It contains
 `package.json`, `slides.md`, `style.css`, `vite.config.ts`, `.gitignore`,
-`components/` and `public/`. `style.css` holds a workaround for a Slidev bug (a
-slide list stuck on screen, see "Known issues" in
-[`../slides-edit/SKILL.md`](../slides-edit/SKILL.md)): copy it as is, and
-whenever you rewrite `style.css` keep that block. Copy `vite.config.ts` as is
-too: without it `npm run build` fails and `npm run export:html` does not
-exist.
+`components/` and `public/`. `style.css` holds two blocks: a workaround for a
+Slidev bug (a slide list stuck on screen, see "Known issues" in
+[`../slides-edit/SKILL.md`](../slides-edit/SKILL.md)) and the rule that
+exports CSS loops at rest. Copy it as is, and whenever you rewrite `style.css`
+keep both blocks. Copy `vite.config.ts` as is too: without it `npm run build`
+fails and `npm run export:html` and `npm run export:ios` do not exist.
 Do not overwrite an existing `package.json`, `.gitignore` or `vite.config.ts`;
 if one exists, merge the Slidev dependencies, scripts and Vite options into it
 instead and tell the user.
@@ -71,12 +71,19 @@ syntax. Work in two passes:
      "undefined" in the slide index (`g`) and in presenter mode.
    - Vary layouts (`cover`, `section`, `two-cols`, `image-right`, `fact`,
      `center`, `end`) instead of bullet after bullet.
-   - Animations according to preferences (none / `v-clicks` / `v-motion`).
+   - Animations according to preferences (none / `v-clicks` / `v-motion`),
+     following "Animations: CSS first" below.
    - Code blocks with stepped highlighting, when useful.
-   - Diagrams in Mermaid, when useful. **Animate them by default** whenever
-     the animation preference is anything but "ninguna" (or the diagram
-     preference asks for it): reveal the diagram step by step with clicks
-     using a pattern from "Animated diagrams" in the cheatsheet. Use a static
+   - Diagrams, when useful. **By default, draw them in HTML/SVG with CSS
+     loop animations** (arrows that flow, a packet that travels between
+     nodes, a dot that goes around a cycle), revealed node by node with
+     clicks: pattern A in "Diagrams" in the cheatsheet. The looping motion is
+     what makes them teach, so prefer this over Mermaid whenever the animation
+     preference is anything but "ninguna".
+     Use **Mermaid** only when the diagram is too big to draw by hand (more
+     than ~6 nodes, several branches or crossings) or is a sequence, state,
+     class, ER or Gantt diagram, or when the user asks for Mermaid; then
+     animate its edges and reveal it in steps (pattern B). Use a static
      diagram only when animations are off, the preference says "estáticos",
      or the user asks for it.
    - Speaker notes as the last `<!-- -->` comment of each slide, if preferred.
@@ -87,6 +94,27 @@ syntax. Work in two passes:
 
 For decks over ~25 slides, split sections into `pages/*.md` and import them
 with `src:`.
+
+### Animations: CSS first
+
+`npm run export:ios` turns the deck into HTML + CSS without JavaScript, the
+only kind of file the iPhone's file preview shows. CSS animations keep moving
+there; anything driven by JavaScript stays still. So:
+
+- **Loops and continuous motion are CSS only**: `@keyframes` in a slide's
+  `<style>` or UnoCSS `animate-spin`, `animate-pulse`, `animate-bounce`,
+  `animate-ping`. Never `setInterval`, `requestAnimationFrame`, JS timers or
+  JS animation libraries for them.
+- **Entrances and steps are fine as they are**: `v-click`, `v-clicks`,
+  `v-motion` and `<v-switch>` use JavaScript, but every export shows their
+  final state, so nothing is lost.
+- **When the motion itself is the content** (a counter, a typing effect, a
+  simulation, an algorithm that computes its steps), first try CSS:
+  `steps()`, one `animation-delay` per element, several `@keyframes`. If it
+  really needs JavaScript, say so in one line before writing it — e.g. "Esta
+  animación necesita JavaScript: se ve en `npm run dev`, el link y
+  `slides-export.html`, pero en el HTML para iPhone (`npm run export:ios`)
+  saldrá quieta." — and go ahead with it.
 
 ### Must survive `npm run export` (PDF)
 
@@ -105,10 +133,12 @@ differently from the screen. Design so the deck looks the same in both:
   slide edge. Theme Mermaid with `%%{init}%%` or `setup/mermaid.ts`, never
   with CSS alone.
 - **Animations**: `v-motion` and `v-click` are fine; Slidev exports their final
-  state. CSS `@keyframes` loops are captured mid-frame, so give components with
-  CSS animations a static layout when `useNav().isPrintMode` is true.
-  Animated diagrams export as their last step, so that step must be the
-  complete diagram.
+  state. CSS loops are exported **at rest** (`animation: none`, from the block
+  in `style.css`), so each loop must look complete without motion: lines and
+  nodes visible in their base style, and anything that only exists while
+  moving (a traveling packet) starts at `opacity: 0` in its base
+  style. Animated diagrams export as their last step, so that step must be
+  the complete diagram.
 - **Math only in Markdown context**: `$…$`/`$$…$$` are not rendered inside
   an HTML element on the same line (`<div>$x$</div>` shows the raw LaTeX).
   Close the HTML, leave a blank line, write the formula, leave a blank line
@@ -119,10 +149,11 @@ screen rendering and does **not** reproduce the PDF-only bugs above.
 
 **Keep the deck in as few files as possible.** Put everything in `slides.md`
 by default: style with UnoCSS classes and per-slide `<style>` blocks. Add to
-`style.css` only styles repeated across many slides (keeping its Goto
-workaround block), and create a
-`components/*.vue` file only for something Markdown + UnoCSS cannot do (e.g. a
-custom animated background). Every extra file is one more write that can be
+`style.css` only styles repeated across many slides (keeping its two
+blocks), and create a
+`components/*.vue` file only for something Markdown + UnoCSS cannot do (loop
+diagrams fit in `slides.md` with a `<style>` block). Every extra file is one
+more write that can be
 blocked (see "If a write is blocked" below).
 
 ## If a write is blocked
@@ -150,6 +181,7 @@ npm run dev        # abre http://localhost:3030 con recarga en caliente
 npm run export     # exporta a PDF (slides-export.pdf)
                    # si falla por falta de Chromium: npx playwright install chromium
 npm run export:html  # un solo archivo, slides-export.html, que se abre con doble clic
+npm run export:ios   # slides-ios.html, para verla en iPhone/iPad
 npm run build      # genera un sitio estático en dist/
 ```
 
@@ -157,6 +189,12 @@ npm run build      # genera un sitio estático en dist/
 (animations included) with someone who has no Node: it opens from disk in any
 browser, with no server. Images in `public/` are embedded in the file; images
 loaded by URL still need internet.
+
+The iPhone/iPad file preview (Files app, AirDrop) does not run
+JavaScript, so it shows `slides-export.html` blank. For those devices,
+`slides-ios.html` has every slide as HTML + CSS: clicks already revealed, CSS
+loops moving, and you swipe from one slide to the next. Mention it when the
+user talks about phones or iPhone.
 
 Mention they can now ask for changes in plain language ("cambia la diapo 4
 a dos columnas") without naming the plugin.

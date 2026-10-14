@@ -50,9 +50,11 @@ where it goes.
   blur, and gradient text are common in Figma and break `npm run export`:
   translate them with "Must survive `npm run export` (PDF)" in
   [`../SKILL.md`](../SKILL.md).
-- **Diagrams stay Mermaid**, so they animate by clicks, follow the color mode
-  and fit the PDF. Take nodes and labels from the Figma or FigJam diagram;
-  embed it as an image only when the user asks for that exact picture.
+- **Diagrams are rebuilt, not pasted**: as a loop diagram, or Mermaid for big
+  ones (see the diagram rule in [`../SKILL.md`](../SKILL.md)), so they
+  animate, follow the color mode and fit the PDF. Take nodes, labels and
+  brand colors from the Figma or FigJam diagram; embed it as an image only
+  when the user asks for that exact picture.
 - **Light and dark.** If the variables have light and dark modes, use the one
   that matches `colorSchema`; with `colorSchema: auto`, put the dark values
   under `html.dark` in `style.css`.

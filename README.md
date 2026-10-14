@@ -37,6 +37,10 @@ claude plugin marketplace update slidesdev
 claude plugin update slides@slidesdev
 ```
 
+O deja que se actualice solo: en `/plugin` → **Marketplaces** → `slidesdev` →
+**Enable auto-update**. Claude Code revisa en segundo plano al empezar cada
+sesión y te avisa con `Run /reload-plugins to apply`.
+
 ### Codex
 
 En la terminal:
@@ -107,8 +111,14 @@ npm install      # la primera vez
 npm run dev      # http://localhost:3030 con recarga en caliente
 npm run export   # PDF  (--format pptx | png para otros formatos)
 npm run export:html  # un solo archivo HTML que se abre con doble clic
+npm run export:ios   # un HTML para verla en iPhone/iPad
 npm run build    # sitio estático en dist/
 ```
+
+Los diagramas salen animados en loop (flechas que fluyen, un punto que recorre
+el flujo) y se revelan por pasos. Mermaid queda para los diagramas grandes o
+de tipos especiales (secuencia, estados, clases…), también con las aristas
+animadas.
 
 ### Compartir la presentación
 
@@ -118,9 +128,17 @@ abre con doble clic en su navegador, sin Node, sin servidor y sin internet.
 Las imágenes de `public/` van dentro del archivo, y las fuentes de Google
 necesitan conexión (sin ella se usa una fuente del sistema).
 
+**En iPhone o iPad** ese archivo sale en blanco: la vista previa de archivos
+(app Archivos, AirDrop) no ejecuta JavaScript, y Slidev lo necesita. Para
+ellos está `npm run export:ios`, que genera `slides-ios.html`: cada slide como
+HTML + CSS, con los clicks ya revelados y las animaciones en loop moviéndose.
+Pasas de una slide a otra deslizando. Lo que dependa de JavaScript (contadores,
+efectos hechos con código) sale quieto, y por eso el plugin hace los loops con
+CSS y te avisa cuando una animación necesita JavaScript.
+
 Si prefieres un enlace, sube la carpeta `dist/` de `npm run build` a cualquier
 hosting estático. El PDF (`npm run export`) abre en todos lados, pero pierde
-las animaciones.
+las animaciones: los loops salen en reposo.
 
 ### Problemas comunes
 
@@ -132,6 +150,9 @@ las animaciones.
   build"* o copia ese archivo del starter.
 - **Una presentación vieja no tiene `npm run export:html`:** pide *"quiero
   compartirla como un HTML"* y el agente añade lo que falta.
+- **El HTML sale en blanco en el iPhone:** usa `npm run export:ios` (ver
+  "Compartir la presentación"). Si tu presentación es anterior a ese comando,
+  pide *"quiero verla en el iPhone"* y el agente añade lo que falta.
 - **Escritura bloqueada ("auto mode classifier gave no verdict" o similar):**
   es el control de permisos del agente, no del plugin. El plugin no intenta
   esquivarlo: se detiene, te dice qué archivo faltó y te ofrece reintentar o
@@ -193,7 +214,7 @@ Ejemplo:
 - **Densidad:** poco texto; máximo 4 bullets por slide
 - **Animaciones:** sutiles — `v-clicks` en listas y transición `fade`
 - **Código:** resaltado por pasos cuando haya más de 8 líneas
-- **Diagramas:** Mermaid para flujos, animados paso a paso
+- **Diagramas:** con animación en loop, revelados paso a paso; Mermaid solo para los grandes
 - **Notas del presentador:** sí
 - **Estructura:** portada → agenda → contenido → resumen → preguntas
 - **Colores/fuentes de marca:** primario #2B90B6, fuente Inter
@@ -303,8 +324,10 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
 | 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic | Se ve como en `npm run dev`, con animaciones e imágenes, sin servidor |
-| 8 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
-| 9 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
+| 8 | `npm run export:ios` (tú) y pasar `slides-ios.html` al iPhone (AirDrop o Archivos) | Abre en la vista previa, los clicks salen revelados y los loops se mueven; se pasa de slide deslizando |
+| 9 | *"Añade un diagrama del flujo de login"* | Diagrama HTML/SVG con flechas en loop, revelado con clicks; en el PDF sale completo y quieto |
+| 10 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
+| 11 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
 
 En Claude Code prueba también `/slides:new charla sobre testing`, y en OpenCode
 `/slides-new charla sobre testing`.
@@ -382,7 +405,9 @@ CI (`.github/workflows/ci.yml`) corre ambos en cada push y PR.
    gh release create v0.2.0 --generate-notes
    ```
 
-Los usuarios reciben la versión nueva al actualizar el marketplace.
+Los usuarios reciben la versión nueva al actualizar el marketplace, o solos
+si activaron el auto-update. Claude Code solo actualiza cuando cambia
+`version`: los pushes a `main` sin subirla no le llegan a nadie.
 
 ---
 

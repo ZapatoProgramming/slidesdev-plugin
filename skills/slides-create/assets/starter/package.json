@@ -6,7 +6,8 @@
     "dev": "slidev --open",
     "build": "slidev build",
     "export": "slidev export",
-    "export:html": "slidev build --router-mode hash --out .slidev/html"
+    "export:html": "slidev build --router-mode hash --out .slidev/html",
+    "export:ios": "slidev build --router-mode hash --out .slidev/ios"
   },
   "dependencies": {
     "@slidev/cli": "^53.0.0",

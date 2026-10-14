@@ -3,3 +3,12 @@
 #slidev-goto-dialog:has(#slidev-goto-input:disabled) .autocomplete-list {
   display: none;
 }
+
+/* `npm run export` (PDF/PNG/PPTX) dibuja los loops de CSS en reposo, sin
+   animación, en vez de a medio movimiento. Cada loop debe verse completo en
+   reposo. Conserva este bloque al reescribir style.css. */
+html.print *,
+html.print *::before,
+html.print *::after {
+  animation: none !important;
+}

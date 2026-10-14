@@ -9,7 +9,7 @@ las descarga de npm al ejecutar `npm install`, junto con su propia licencia.
 | [`@slidev/cli`](https://github.com/slidevjs/slidev) | Motor de las presentaciones | MIT | © 2020-PRESENT Anthony Fu |
 | [`@slidev/theme-default`](https://github.com/slidevjs/themes) | Tema por defecto | MIT | © 2021 Slidev.js Team |
 | [`vue`](https://github.com/vuejs/core) | Dependencia de Slidev | MIT | © 2018-present Yuxi (Evan) You and Vue contributors |
-| [`playwright-chromium`](https://github.com/microsoft/playwright) | Exportar a PDF/PPTX/PNG | Apache-2.0 | © Microsoft Corporation |
+| [`playwright-chromium`](https://github.com/microsoft/playwright) | Exportar a PDF/PPTX/PNG y a HTML para iPhone | Apache-2.0 | © Microsoft Corporation |
 | [`vite-plugin-singlefile`](https://github.com/richardtallent/vite-plugin-singlefile) | Exportar a un solo HTML | MIT | © 2021-present Richard S. Tallent, II |
 
 ## Documentación
