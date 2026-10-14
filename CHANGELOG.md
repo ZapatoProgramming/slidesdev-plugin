@@ -6,6 +6,20 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+- Regla para cualquier cambio a los exports, en `slides-edit` y `CONTRIBUTING.md`: cada slide llena la ventana y se avanza de a una; se comprueba en teléfono horizontal, vertical y escritorio, y `slides-export.html` con JavaScript apagado y en WebKit, no solo en Chromium.
+- Prueba de regresión `tests/export-html.test.mjs`: genera `slides-export.html` de un deck mínimo y lo abre con JavaScript apagado en WebKit y Chromium (844×390 móvil y 1440×900) para comprobar que la slide llena la pantalla y que → avanza de a una.
+
+### Changed
+- Un solo export HTML: `npm run export:html` genera ahora `slides-export.html` como HTML + CSS sin JavaScript (lo que antes hacía `export:ios`). El mismo archivo se abre con doble clic en cualquier navegador y en la vista previa de archivos del iPhone/iPad. Los clicks salen revelados, los loops de CSS se mueven y lo que dependa de JavaScript queda quieto; no hay transiciones entre slides (para eso, `npm run dev`). `slides-edit` sabe pasar al export nuevo las presentaciones de la 0.3.0 o anteriores, sin tocar `slides.md`.
+- Las animaciones van primero en loop: por defecto todo se mueve solo, sin clicks. La pregunta de animaciones de `slides-preferences` pasa a ser "¿todas en loop, con clicks o variadas?" (o ninguna; default en loop), y `slides-create` la hace una vez si el `AGENTS.md` es de una versión anterior y no la responde. Los diagramas se revelan con clicks solo con animaciones con clicks o variadas; en loop salen completos desde el inicio. `slides-edit` responde a "anímala" con un loop y no con un click. La plantilla de preferencias y el cheatsheet (que ahora pone los loops antes que los clicks) lo reflejan.
+
+### Removed
+- `npm run export:ios` y `slides-ios.html`: su HTML es ahora el de `npm run export:html`.
+
+### Fixed
+- El HTML sin JavaScript se comporta como una presentación: cada slide llena la pantalla, escalada para caber entera, y se pasa de a una con swipe lateral (← → en la compu). En `slides-ios.html` (0.2.0–0.3.0) cada slide quedaba fija en 980×552 px (chica en la compu, cortada abajo en el iPhone horizontal) y todas se apilaban en una sola página vertical sin forma de avanzar de a una. Requiere iOS 16 o posterior.
+
 ## [0.3.0] - 2026-10-14
 
 ### Changed

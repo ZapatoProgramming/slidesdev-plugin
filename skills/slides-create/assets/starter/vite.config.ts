@@ -1,17 +1,16 @@
 // Configuración de Vite que Slidev carga sola. Conserva este archivo.
 // - `cssMinify: false`: con Slidev 53 + Vite 8, `npm run build` falla al
 //   minificar el CSS de Slidev ("lightningcss minify: Invalid token").
-// - `npm run export:html` empaqueta la presentación en slides-export.html: un
-//   solo archivo, con las imágenes de public/ dentro, que se abre con doble
-//   clic en cualquier navegador, sin servidor.
-// - `npm run export:ios` genera slides-ios.html: la misma presentación como
-//   HTML + CSS, sin JavaScript, para la vista previa de archivos del iPhone
-//   (app Archivos, AirDrop), que no ejecuta JavaScript. Los clicks salen
-//   revelados, los loops de CSS siguen moviéndose y lo que dependa de
-//   JavaScript queda quieto.
+// - `npm run export:html` genera slides-export.html: la presentación como
+//   HTML + CSS, sin JavaScript, en un solo archivo con las imágenes de public/
+//   dentro. Se abre con doble clic en cualquier navegador, sin servidor, y en
+//   la vista previa de archivos del iPhone/iPad (app Archivos, AirDrop), que
+//   no ejecuta JavaScript. Cada slide llena la pantalla y se pasa con swipe
+//   lateral (← → en la compu). Los clicks salen revelados, los loops de CSS
+//   siguen moviéndose y lo que dependa de JavaScript queda quieto.
 import type { Plugin, UserConfig } from 'vite'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { copyFile, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import { extname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -32,11 +31,11 @@ const MIME: Record<string, string> = {
 
 const deckRoot = fileURLToPath(new URL('.', import.meta.url))
 
-// `copyTo`: archivo de la presentación donde dejar el HTML final, si hace falta
-function singleFileHtml(copyTo?: string): Plugin {
+// Build de un solo archivo, con las imágenes de public/ dentro, para que
+// staticHtml() lo abra desde el disco
+function singleFileHtml(): Plugin {
   const uris = new Map<string, string>() // "img/foto.png" → data URI
   const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  let outDir = ''
 
   return {
     name: 'slides:single-file-html',
@@ -56,7 +55,6 @@ function singleFileHtml(copyTo?: string): Plugin {
       }
     },
     configResolved(config) {
-      outDir = resolve(config.root, config.build.outDir)
       if (!config.publicDir || !existsSync(config.publicDir))
         return
       for (const file of readdirSync(config.publicDir, { recursive: true, encoding: 'utf8' })) {
@@ -85,11 +83,6 @@ function singleFileHtml(copyTo?: string): Plugin {
         else
           item.source = code
       }
-    },
-    async closeBundle() {
-      const html = join(outDir, 'index.html')
-      if (copyTo && existsSync(html))
-        await copyFile(html, join(deckRoot, copyTo))
     },
   }
 }
@@ -137,12 +130,12 @@ const PAGE_HEAD = `({
 const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 
 // Abre el build de un solo archivo en Chromium, recorre las slides en su último
-// click y guarda el DOM ya dibujado, sin scripts, en slides-ios.html
-function iosHtml(): Plugin {
+// click y guarda el DOM ya dibujado, sin scripts, en slides-export.html
+function staticHtml(): Plugin {
   let outDir = ''
 
   return {
-    name: 'slides:ios-html',
+    name: 'slides:static-html',
     enforce: 'post',
     configResolved(config) {
       outDir = resolve(config.root, config.build.outDir)
@@ -154,7 +147,7 @@ function iosHtml(): Plugin {
       const url = pathToFileURL(index).href
       const { chromium } = await import('playwright-chromium')
       const browser = await chromium.launch().catch((err: Error) => {
-        throw new Error(`[export:ios] no se pudo abrir Chromium; ejecuta una vez \`npx playwright install chromium\`.\n${err.message}`)
+        throw new Error(`[export:html] no se pudo abrir Chromium; ejecuta una vez \`npx playwright install chromium\`.\n${err.message}`)
       })
       try {
         // La vista de impresión lista todas las slides y su tamaño
@@ -178,7 +171,7 @@ function iosHtml(): Plugin {
             await page.goto('about:blank')
             await page.goto(`${url}#/${no}?clicks=999999`)
             await page.waitForFunction(SLIDE_READY, null, { timeout: 15_000 })
-              .catch(() => console.warn(`[export:ios] la slide ${no} tardó en cargar; se guarda como esté`))
+              .catch(() => console.warn(`[export:html] la slide ${no} tardó en cargar; se guarda como esté`))
             await page.evaluate('document.fonts.ready.then(() => true)')
             await page.waitForTimeout(1200) // que terminen las entradas de v-motion
             slides.set(no, await page.evaluate(SLIDE_HTML))
@@ -191,24 +184,33 @@ function iosHtml(): Plugin {
 <html${attrs}>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=${deck.width + 40}">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(head.title)}</title>
 ${head.links.join('\n')}
 <style>${head.css}</style>
 <style>
-html, body { height: auto !important; overflow: auto !important; margin: 0 !important; padding: 0 !important; background: #000 !important; -webkit-text-size-adjust: 100%; }
-html { scroll-snap-type: y mandatory; }
-.ios-slide { min-height: 100vh; box-sizing: border-box; padding: 20px 0; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; }
-.ios-slide > #slide-content { position: relative !important; left: auto !important; top: auto !important; transform: none !important; flex: none; overflow: hidden; }
+html, body { height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important; background: #000 !important; -webkit-text-size-adjust: 100%; }
+/* Una slide por pantalla, en fila: swipe lateral en el iPhone, ← → en la compu.
+   El scroll va en .export-deck y no en la página para que iOS no achique la
+   página entera al ver contenido más ancho que la pantalla. */
+.export-deck { position: fixed; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; outline: none; }
+.export-deck::-webkit-scrollbar { display: none; }
+.export-slide { flex: none; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; scroll-snap-align: start; scroll-snap-stop: always; container-type: size; }
+/* Escala para caber entera en la pantalla, sin JavaScript: tan(atan2(a, b)) = a / b
+   como número. Si el navegador no lo entiende, la slide queda a tamaño real. */
+.export-slide > #slide-content { position: relative !important; left: auto !important; top: auto !important; transform: none !important; flex: none; overflow: hidden;
+  scale: min(tan(atan2(100cqw, ${deck.width}px)), tan(atan2(100cqh, ${deck.height}px))); }
 </style>
 </head>
 <body>
-${deck.slides.map((no: number) => `<section class="ios-slide">${slides.get(no) ?? ''}</section>`).join('\n')}
+<main class="export-deck" tabindex="-1" autofocus>
+${deck.slides.map((no: number) => `<section class="export-slide">${slides.get(no) ?? ''}</section>`).join('\n')}
+</main>
 </body>
 </html>
 `
-        await writeFile(join(deckRoot, 'slides-ios.html'), html)
-        console.log(`[export:ios] slides-ios.html: ${deck.slides.length} slides, ${(html.length / 1024 / 1024).toFixed(1)} MB`)
+        await writeFile(join(deckRoot, 'slides-export.html'), html)
+        console.log(`[export:html] slides-export.html: ${deck.slides.length} slides, ${(html.length / 1024 / 1024).toFixed(1)} MB`)
       }
       finally {
         await browser.close()
@@ -218,16 +220,15 @@ ${deck.slides.map((no: number) => `<section class="ios-slide">${slides.get(no) ?
 }
 
 // npm (y pnpm, yarn, bun) exponen el nombre del script en ejecución
-const script = process.env.npm_lifecycle_event
-const singleFile = script === 'export:html' || script === 'export:ios'
+const htmlExport = process.env.npm_lifecycle_event === 'export:html'
 
 const config: UserConfig = {
   build: { cssMinify: false },
-  plugins: singleFile
+  plugins: htmlExport
     ? [
-        singleFileHtml(script === 'export:html' ? 'slides-export.html' : undefined),
+        singleFileHtml(),
         (await import('vite-plugin-singlefile')).viteSingleFile(),
-        ...(script === 'export:ios' ? [iosHtml()] : []),
+        staticHtml(),
       ]
     : [],
 }

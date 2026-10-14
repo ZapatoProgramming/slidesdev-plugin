@@ -128,35 +128,41 @@ El plugin:
 npm install      # la primera vez
 npm run dev      # http://localhost:3030 con recarga en caliente
 npm run export   # PDF  (--format pptx | png para otros formatos)
-npm run export:html  # un solo archivo HTML que se abre con doble clic
-npm run export:ios   # un HTML para verla en iPhone/iPad
+npm run export:html  # un solo archivo HTML que se abre con doble clic, también en iPhone/iPad
 npm run build    # sitio estático en dist/
 ```
 
-Los diagramas salen animados en loop (flechas que fluyen, un punto que recorre
-el flujo) y se revelan por pasos. Mermaid queda para los diagramas grandes o
-de tipos especiales (secuencia, estados, clases…), también con las aristas
-animadas.
+Las animaciones van primero en loop: se mueven solas, sin clicks. La primera
+vez te pregunta si las quieres todas en loop, con clicks (aparecen paso a
+paso) o variadas (loops primero y clicks donde sumen), y lo guarda en tus
+preferencias. Los diagramas salen animados en loop (flechas que fluyen, un
+punto que recorre el flujo); con clicks o variadas, además se revelan por
+pasos. Mermaid queda para los diagramas grandes o de tipos especiales
+(secuencia, estados, clases…), también con las aristas animadas.
 
 ### Compartir la presentación
 
-`npm run export:html` genera `slides-export.html`: un único archivo que se ve
-igual que en `npm run dev`, con animaciones y transiciones, y que cualquiera
-abre con doble clic en su navegador, sin Node, sin servidor y sin internet.
-Las imágenes de `public/` van dentro del archivo, y las fuentes de Google
-necesitan conexión (sin ella se usa una fuente del sistema).
+`npm run export:html` genera `slides-export.html`: la presentación como
+HTML + CSS, sin JavaScript, en un único archivo que cualquiera abre con doble
+clic en su navegador, sin Node y sin servidor. También se abre en el iPhone o
+el iPad desde la vista previa de archivos (app Archivos, AirDrop), que no
+ejecuta JavaScript; ahí necesita iOS 16 o posterior. Las imágenes de `public/`
+van dentro del archivo, y las fuentes de Google necesitan conexión (sin ella
+se usa una fuente del sistema).
 
-**En iPhone o iPad** ese archivo sale en blanco: la vista previa de archivos
-(app Archivos, AirDrop) no ejecuta JavaScript, y Slidev lo necesita. Para
-ellos está `npm run export:ios`, que genera `slides-ios.html`: cada slide como
-HTML + CSS, con los clicks ya revelados y las animaciones en loop moviéndose.
-Pasas de una slide a otra deslizando. Lo que dependa de JavaScript (contadores,
-efectos hechos con código) sale quieto, y por eso el plugin hace los loops con
-CSS y te avisa cuando una animación necesita JavaScript.
+Se ve como una presentación: una slide por pantalla, escalada para caber
+entera, y pasas a la siguiente con un swipe lateral (← → en la compu). Las
+slides son 16:9, así que con el teléfono vertical quedan franjas negras arriba
+y abajo: gíralo. En la compu la rueda vertical del mouse no avanza. Los clicks
+salen ya revelados y las animaciones en loop se mueven; lo que dependa de
+JavaScript (contadores, efectos hechos con código) sale quieto, y no hay
+transiciones entre slides. Por eso el plugin hace los loops con CSS y te
+avisa cuando una animación necesita JavaScript.
 
-Si prefieres un enlace, sube la carpeta `dist/` de `npm run build` a cualquier
-hosting estático. El PDF (`npm run export`) abre en todos lados, pero pierde
-las animaciones: los loops salen en reposo.
+Para presentar con clicks y transiciones usa `npm run dev`, o sube la carpeta
+`dist/` de `npm run build` a cualquier hosting estático si prefieres un
+enlace. El PDF (`npm run export`) abre en todos lados, pero pierde las
+animaciones: los loops salen en reposo.
 
 ### Problemas comunes
 
@@ -166,11 +172,13 @@ las animaciones: los loops salen en reposo.
   bug de Slidev 53 con Vite 8. Las presentaciones nuevas traen un
   `vite.config.ts` que lo evita; en una creada antes, pide *"arregla el
   build"* o copia ese archivo del starter.
-- **Una presentación vieja no tiene `npm run export:html`:** pide *"quiero
-  compartirla como un HTML"* y el agente añade lo que falta.
-- **El HTML sale en blanco en el iPhone:** usa `npm run export:ios` (ver
-  "Compartir la presentación"). Si tu presentación es anterior a ese comando,
-  pide *"quiero verla en el iPhone"* y el agente añade lo que falta.
+- **Una presentación vieja no tiene `npm run export:html`, el HTML sale en
+  blanco en el iPhone o `slides-ios.html` sale chica, se corta o no avanza:**
+  tu presentación tiene el export de la versión 0.3.0 o anterior. Pide
+  *"actualiza el export a HTML"*: el agente cambia el `vite.config.ts` y los
+  scripts de `package.json`, sin tocar tus slides. Luego corre
+  `npm install` y `npm run export:html`; el `slides-ios.html` viejo ya no se
+  usa.
 - **Escritura bloqueada ("auto mode classifier gave no verdict" o similar):**
   es el control de permisos del agente, no del plugin. El plugin no intenta
   esquivarlo: se detiene, te dice qué archivo faltó y te ofrece reintentar o
@@ -230,7 +238,7 @@ Ejemplo:
 - **Modo de color:** oscuro
 - **Tono:** técnico pero cercano
 - **Densidad:** poco texto; máximo 4 bullets por slide
-- **Animaciones:** sutiles — `v-clicks` en listas y transición `fade`
+- **Animaciones:** variadas — loops primero, `v-clicks` solo en listas que se construyen paso a paso; transición `fade`
 - **Código:** resaltado por pasos cuando haya más de 8 líneas
 - **Diagramas:** con animación en loop, revelados paso a paso; Mermaid solo para los grandes
 - **Notas del presentador:** sí
@@ -335,20 +343,34 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 
 | # | Prompt | Resultado esperado |
 |---|---|---|
-| 1 | *"Hazme una presentación de 5 minutos sobre Git"* | Hace ≤ 5 preguntas de estilo, crea `AGENTS.md` con `## Presentaciones`, `slides.md`, `package.json`, `.gitignore`, `components/`, `public/`, y sugiere los comandos sin ejecutarlos |
+| 1 | *"Hazme una presentación de 5 minutos sobre Git"* | Hace ≤ 5 preguntas de estilo (una: animaciones en loop, con clicks o variadas; default en loop), crea `AGENTS.md` con `## Presentaciones`, `slides.md`, `package.json`, `.gitignore`, `components/`, `public/`, y sugiere los comandos sin ejecutarlos |
 | 2 | `npm install && npm run dev` (tú, en otra terminal) | La presentación abre en http://localhost:3030 |
 | 3 | *"Haz más grande el título de la diapo 2"* (sin nombrar el plugin) | Solo cambia esa slide y dice qué cambió; el navegador se actualiza solo |
 | 4 | *"Pon la diapo 3 a dos columnas"* | Usa `layout: two-cols` con `::right::` |
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
-| 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic | Se ve como en `npm run dev`, con animaciones e imágenes, sin servidor |
-| 8 | `npm run export:ios` (tú) y pasar `slides-ios.html` al iPhone (AirDrop o Archivos) | Abre en la vista previa, los clicks salen revelados y los loops se mueven; se pasa de slide deslizando |
-| 9 | *"Añade un diagrama del flujo de login"* | Diagrama HTML/SVG con flechas en loop, revelado con clicks; en el PDF sale completo y quieto |
+| 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic en la compu | Abre sin servidor, con imágenes; cada slide llena la ventana sin cortarse, ← → pasan de a una slide y los loops se mueven |
+| 8 | Pasar ese `slides-export.html` al iPhone (AirDrop o Archivos) | Abre en la vista previa, los clicks salen revelados y los loops se mueven; en horizontal cada slide llena la pantalla sin cortarse; el swipe lateral pasa de a una slide; en la compu ← → también |
+| 9 | *"Añade un diagrama del flujo de login"* | Diagrama HTML/SVG con flechas en loop; con animaciones en loop sale completo desde el inicio, con clicks o variadas se revela por pasos; en el PDF sale completo y quieto |
 | 10 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
 | 11 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
 
 En Claude Code prueba también `/slides-dev-plugin:new charla sobre testing`, y en OpenCode
 `/slides-dev-plugin-new charla sobre testing`.
+
+Si cambias un export (el `vite.config.ts` del starter o el script
+`export:html`), corre también la prueba automática de `slides-export.html`:
+
+```bash
+node --test tests/export-html.test.mjs   # la primera vez tarda: instala un deck mínimo
+SLIDES_TEST_DECK=/tmp/deck-html node --test tests/export-html.test.mjs   # reutiliza el deck entre corridas
+```
+
+Abre el HTML con JavaScript apagado en WebKit y Chromium, como teléfono en
+horizontal (844×390) y como escritorio (1440×900), y comprueba que la slide
+llena la pantalla sin salirse y que dos → la dejan en la slide 3. No cubre el
+teléfono vertical, el swipe ni la vista previa real del iPhone: eso sigue en la
+fila 8.
 
 ### 4. Probar las preferencias globales
 

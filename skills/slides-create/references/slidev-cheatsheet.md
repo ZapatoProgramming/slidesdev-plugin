@@ -66,6 +66,24 @@ Notas del presentador: el último comentario HTML de una slide.
 Other per-slide keys: `class: text-center`, `background: /bg.jpg`,
 `transition:`, `clicks: 3`, `hide: true`, `zoom: 0.8`.
 
+## Loops (CSS)
+
+Loops come before clicks: reach for one first, and use the click animations
+below only when the **Animaciones:** preference is "con clicks" or
+"variadas" (see "Animations: loops first, in CSS" in `SKILL.md`).
+
+Continuous motion is CSS only, so it keeps moving in `npm run export:html`
+(no JavaScript there). Never `setInterval` or `requestAnimationFrame` for it.
+
+- UnoCSS: `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`.
+  Slower or faster: `style="animation-duration: 4s"` on the element.
+- Custom: `@keyframes` in the slide's `<style>` and
+  `animation: nombre 2s linear infinite`.
+- `npm run export` draws them at rest (`animation: none`, from `style.css`):
+  the base style must be the complete picture. Things that only exist while
+  moving start at `opacity: 0` and their keyframes fade them in.
+- Loop diagrams: see "Diagrams".
+
 ## Click animations
 
 ```md
@@ -110,20 +128,6 @@ Blank lines around the markdown inside `<v-clicks>` are required.
 `fade`, `fade-out`, `slide-left`, `slide-right`, `slide-up`, `slide-down`,
 `view-transition`. Different forward/back: `transition: slide-left | slide-right`.
 
-## Loops (CSS)
-
-Continuous motion is CSS only, so it keeps moving in `npm run export:ios`
-(iPhone). Never `setInterval` or `requestAnimationFrame` for it.
-
-- UnoCSS: `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`.
-  Slower or faster: `style="animation-duration: 4s"` on the element.
-- Custom: `@keyframes` in the slide's `<style>` and
-  `animation: nombre 2s linear infinite`.
-- `npm run export` draws them at rest (`animation: none`, from `style.css`):
-  the base style must be the complete picture. Things that only exist while
-  moving start at `opacity: 0` and their keyframes fade them in.
-- Loop diagrams: see "Diagrams".
-
 ## Styling
 
 - UnoCSS (Tailwind-compatible) classes work everywhere:
@@ -161,12 +165,14 @@ const b = 2
 ## Diagrams
 
 Diagrams loop by default: the motion shows how things flow, and CSS loops keep
-moving in `npm run export:ios` (iPhone). Pick by size:
+moving in `npm run export:html`. Pick by size:
 
 **A. Default — HTML/SVG with CSS loops.** Nodes are HTML boxes; each
 connector is a small inline SVG whose dashes flow, with a packet traveling
 along it. Each click shows an arrow and the next node together (`v-click` +
-`v-after`). Up to ~6 nodes; for vertical flows use `flex-col`, a vertical SVG
+`v-after`); with the "en loop" preference, drop `v-click` and `v-after` so the
+whole diagram is there from the start, moving. Up to ~6 nodes; for vertical
+flows use `flex-col`, a vertical SVG
 (`viewBox="0 0 20 100"`, line from `10,0` to `10,88`) and `translateY` in the
 packet's keyframes.
 
@@ -247,7 +253,9 @@ flowchart LR
 Mermaid draws inside a shadow root, so slide CSS cannot style or animate its
 parts: use Mermaid's own syntax (`animate`, `classDef`, `%%{init}%%`).
 
-To reveal it in steps, wrap it in `<v-switch>`: each step is the previous one
+With the "en loop" preference the diagram above is enough: all of it, edges
+flowing. With "con clicks" or "variadas", reveal it in steps by wrapping it
+in `<v-switch>`: each step is the previous one
 plus the next nodes, one step is shown per click, and the last one is the
 complete diagram.
 
@@ -382,12 +390,13 @@ the PDF:
   If it fails because Chromium is missing (newer npm blocks install scripts),
   suggest `npx playwright install chromium` once.
   `npm run export -- --format pptx` or `--format png` for other formats.
-- `npm run export:html` — `slides-export.html`, a single file that opens with a
-  double click (no server, no Node) and keeps animations. Needs
-  `vite.config.ts` and `vite-plugin-singlefile` from the starter. The
-  iPhone/iPad file preview shows it blank (it does not run JavaScript).
-- `npm run export:ios` — `slides-ios.html`, the deck as HTML + CSS without
-  JavaScript for the iPhone/iPad file preview: clicks revealed, CSS loops
-  moving, swipe between slides. Needs the starter's `vite.config.ts` and
-  Chromium (like `npm run export`).
+- `npm run export:html` — `slides-export.html`, the deck as HTML + CSS
+  without JavaScript in a single file: opens with a double click (no server,
+  no Node) and in the iPhone/iPad file preview (iOS 16+). Clicks revealed,
+  CSS loops moving, one slide per screen scaled to fit, sideways swipe to the
+  next one (← → on a computer). On a phone held upright the 16:9 slides leave
+  black bands (turn it sideways); on a computer the vertical mouse wheel does
+  not advance. No slide transitions or JavaScript-driven motion. Needs the
+  starter's `vite.config.ts`, `vite-plugin-singlefile` and Chromium (like
+  `npm run export`).
 - `npm run build` — static SPA in `dist/` for hosting.

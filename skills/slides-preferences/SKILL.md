@@ -30,10 +30,12 @@ one message**, each with a suggested default so they can answer "ok":
 1. Idioma de las slides (default: el de la conversación).
 2. Tema Slidev (`default`, `seriph`, u otro de npm) y modo claro/oscuro.
 3. Tono (técnico / divulgativo / ejecutivo) y densidad de texto (poco texto, 3-5 bullets máx.).
-4. Animaciones: ninguna / sutiles (`v-click`, `fade`) / muchas (`v-motion`, transiciones).
+4. Animaciones: ¿todas en loop (se mueven solas, sin clicks), con clicks
+   (aparecen paso a paso) o variadas (loops primero y clicks donde sumen)?
+   También puede elegir ninguna. Default: en loop.
    Los diagramas se hacen con animación en loop (flechas que fluyen, un punto que
-   recorre el flujo) y se revelan por pasos, salvo que elija "ninguna" o pida
-   diagramas estáticos.
+   recorre el flujo); con clicks o variadas, además se revelan por pasos. Quedan
+   quietos si elige "ninguna" o pide diagramas estáticos.
 5. Colores o fuente de marca, si tiene.
    If Figma MCP tools are available, add "(o un link de Figma con ellos)".
    With a link, read the values as in
@@ -62,4 +64,13 @@ Older versions of the template wrote **Diagramas:** `Mermaid cuando ayude a
 explicar un flujo; animados, se revelan paso a paso con clicks`. That line is
 the old default, not a choice of the user: follow the current diagram rule
 (loop diagrams first) and offer once to update the line to the one in the
-template.
+template. The same goes for `revelados paso a paso con clicks` in a
+**Diagramas:** line: whether diagrams are revealed with clicks follows
+**Animaciones:**.
+
+An **Animaciones:** line that does not say "en loop", "con clicks",
+"variadas" or "ninguna" (older templates wrote `sutiles — v-clicks en listas
+y transición slide-left`) does not answer the animation question. Ask it
+once, as in "Animations: loops first, in CSS" in
+[`../slides-create/SKILL.md`](../slides-create/SKILL.md), and update the line
+with the answer.

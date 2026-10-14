@@ -16,6 +16,12 @@
      de Claude va en `commands/` o `.claude-plugin/`, lo de Codex en
      `.codex-plugin/`, lo de Antigravity en `plugin.json` y lo de OpenCode en
      `.opencode/`.
+   - Un export tiene que verse como una presentación: cada slide llena la
+     ventana y se avanza de a una. Si tocas uno, compruébalo en un teléfono
+     horizontal, un teléfono vertical y un escritorio; para
+     `slides-export.html`, con JavaScript apagado y en WebKit, no solo en
+     Chromium (el iPhone es WebKit), y corre
+     `node --test tests/export-html.test.mjs`.
 4. Ejecuta `node scripts/validate.mjs`.
 5. Si tocas un skill, prueba el flujo en todos los agentes que puedas.
 6. Añade una línea en `CHANGELOG.md` bajo `[Unreleased]` y abre el PR.

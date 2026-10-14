@@ -21,6 +21,11 @@ repo you are in (README, code) and files the user points to. Ask only for what
 is missing and matters, in one short message. Rule of thumb: ~1 slide per
 minute of talk, plus cover and closing.
 
+If the **Animaciones:** preference does not say "en loop", "con clicks",
+"variadas" or "ninguna" (e.g. an AGENTS.md written by an older version of the
+plugin), add the animation question from "Animations: loops first, in CSS"
+below to that same message.
+
 If the deck is about the current repository, read the relevant code/docs first
 so the content is accurate, and cite real file names.
 
@@ -43,10 +48,11 @@ Slidev bug (a slide list stuck on screen, see "Known issues" in
 [`../slides-edit/SKILL.md`](../slides-edit/SKILL.md)) and the rule that
 exports CSS loops at rest. Copy it as is, and whenever you rewrite `style.css`
 keep both blocks. Copy `vite.config.ts` as is too: without it `npm run build`
-fails and `npm run export:html` and `npm run export:ios` do not exist.
+fails and `npm run export:html` does not exist.
 Do not overwrite an existing `package.json`, `.gitignore` or `vite.config.ts`;
 if one exists, merge the Slidev dependencies, scripts and Vite options into it
-instead and tell the user.
+instead and tell the user. Merging `vite.config.ts` changes the exports:
+follow "Changing an export" in [`../slides-edit/SKILL.md`](../slides-edit/SKILL.md).
 
 Then adjust:
 - `package.json` → `name` (kebab-case of the title); add the theme package if
@@ -71,21 +77,24 @@ syntax. Work in two passes:
      "undefined" in the slide index (`g`) and in presenter mode.
    - Vary layouts (`cover`, `section`, `two-cols`, `image-right`, `fact`,
      `center`, `end`) instead of bullet after bullet.
-   - Animations according to preferences (none / `v-clicks` / `v-motion`),
-     following "Animations: CSS first" below.
+   - Animations according to the **Animaciones:** preference (en loop / con
+     clicks / variadas / ninguna), following "Animations: loops first, in
+     CSS" below.
    - Code blocks with stepped highlighting, when useful.
    - Diagrams, when useful. **By default, draw them in HTML/SVG with CSS
      loop animations** (arrows that flow, a packet that travels between
-     nodes, a dot that goes around a cycle), revealed node by node with
-     clicks: pattern A in "Diagrams" in the cheatsheet. The looping motion is
-     what makes them teach, so prefer this over Mermaid whenever the animation
-     preference is anything but "ninguna".
+     nodes, a dot that goes around a cycle): pattern A in "Diagrams" in the
+     cheatsheet. The looping motion is what makes them teach, so prefer this
+     over Mermaid whenever the animation preference is anything but
+     "ninguna". Reveal them node by node with clicks only when the preference
+     is "con clicks" or "variadas"; "en loop" shows the whole diagram from the
+     start, moving.
      Use **Mermaid** only when the diagram is too big to draw by hand (more
      than ~6 nodes, several branches or crossings) or is a sequence, state,
      class, ER or Gantt diagram, or when the user asks for Mermaid; then
-     animate its edges and reveal it in steps (pattern B). Use a static
-     diagram only when animations are off, the preference says "estáticos",
-     or the user asks for it.
+     animate its edges (pattern B) and, with clicks or "variadas", reveal it
+     in steps. Use a static diagram only when animations are off, the
+     preference says "estáticos", or the user asks for it.
    - Speaker notes as the last `<!-- -->` comment of each slide, if preferred.
    - Images: never invent URLs. Use a placeholder
      (`<!-- TODO: imagen de … -->`), files the user provided in `public/`,
@@ -95,11 +104,35 @@ syntax. Work in two passes:
 For decks over ~25 slides, split sections into `pages/*.md` and import them
 with `src:`.
 
-### Animations: CSS first
+### Animations: loops first, in CSS
 
-`npm run export:ios` turns the deck into HTML + CSS without JavaScript, the
-only kind of file the iPhone's file preview shows. CSS animations keep moving
-there; anything driven by JavaScript stays still. So:
+Loops come before clicks. The **Animaciones:** preference picks the mode:
+
+- **en loop** (default): everything is on screen from the start and the
+  motion is continuous — arrows that flow, a packet that travels, a dot
+  around a cycle, a highlight that pulses. No `v-click`/`v-clicks`; diagrams
+  appear complete and keep moving.
+- **con clicks**: content appears step by step (`v-clicks` in lists,
+  diagrams revealed node by node); what is already visible keeps its loops.
+  The steps play in `npm run dev`; `slides-export.html` shows them already
+  revealed.
+- **variadas**: loops by default; clicks only where the order is the point
+  (an argument that builds up, a process told step by step), never on every
+  list.
+- **ninguna**: no loops and no clicks; static diagrams.
+
+If the preference names none of these, ask once, in the same message as any
+other brief question: "¿Quieres todas las animaciones en loop (se mueven
+solas, sin clicks), con clicks (aparecen paso a paso) o variadas (loops
+primero y clicks donde sumen)? Si no me dices nada, van en loop." Then offer
+to save the answer in **Animaciones:** (see
+[`../slides-preferences/SKILL.md`](../slides-preferences/SKILL.md)).
+
+Write the loops in CSS. `npm run export:html` turns the deck into
+`slides-export.html`, HTML + CSS without JavaScript, the file the user shares:
+it opens in any browser and in the iPhone's file preview, one slide per
+screen, scaled to fit, swiped sideways. CSS animations keep moving there;
+anything driven by JavaScript stays still. So:
 
 - **Loops and continuous motion are CSS only**: `@keyframes` in a slide's
   `<style>` or UnoCSS `animate-spin`, `animate-pulse`, `animate-bounce`,
@@ -107,14 +140,14 @@ there; anything driven by JavaScript stays still. So:
   JS animation libraries for them.
 - **Entrances and steps are fine as they are**: `v-click`, `v-clicks`,
   `v-motion` and `<v-switch>` use JavaScript, but every export shows their
-  final state, so nothing is lost.
+  final state, so the content is all there; only the step-by-step is left to
+  `npm run dev`.
 - **When the motion itself is the content** (a counter, a typing effect, a
   simulation, an algorithm that computes its steps), first try CSS:
   `steps()`, one `animation-delay` per element, several `@keyframes`. If it
   really needs JavaScript, say so in one line before writing it — e.g. "Esta
-  animación necesita JavaScript: se ve en `npm run dev`, el link y
-  `slides-export.html`, pero en el HTML para iPhone (`npm run export:ios`)
-  saldrá quieta." — and go ahead with it.
+  animación necesita JavaScript: se ve en `npm run dev` y en el link, pero
+  en el HTML (`npm run export:html`) saldrá quieta." — and go ahead with it.
 
 ### Must survive `npm run export` (PDF)
 
@@ -180,21 +213,19 @@ npm install        # la primera vez (requiere Node >= 22.12)
 npm run dev        # abre http://localhost:3030 con recarga en caliente
 npm run export     # exporta a PDF (slides-export.pdf)
                    # si falla por falta de Chromium: npx playwright install chromium
-npm run export:html  # un solo archivo, slides-export.html, que se abre con doble clic
-npm run export:ios   # slides-ios.html, para verla en iPhone/iPad
+npm run export:html  # slides-export.html: un solo archivo que se abre con doble clic, también en iPhone/iPad
 npm run build      # genera un sitio estático en dist/
 ```
 
-`slides-export.html` is the way to share the deck as it looks in `npm run dev`
-(animations included) with someone who has no Node: it opens from disk in any
-browser, with no server. Images in `public/` are embedded in the file; images
-loaded by URL still need internet.
-
-The iPhone/iPad file preview (Files app, AirDrop) does not run
-JavaScript, so it shows `slides-export.html` blank. For those devices,
-`slides-ios.html` has every slide as HTML + CSS: clicks already revealed, CSS
-loops moving, and you swipe from one slide to the next. Mention it when the
-user talks about phones or iPhone.
+`slides-export.html` is the way to share the deck with someone who has no
+Node: HTML + CSS without JavaScript, in one file that opens from disk in any
+browser, with no server, and in the iPhone/iPad file preview (Files app,
+AirDrop). Clicks come out already revealed and CSS loops keep moving; one
+slide per screen, scaled to fit, and a sideways swipe moves to the next one
+(← → on a computer). On a phone held upright the 16:9 slides leave black
+bands, so suggest turning it sideways; on a computer the vertical mouse wheel
+does not advance. Images in `public/` are embedded in the file; images loaded
+by URL still need internet.
 
 Mention they can now ask for changes in plain language ("cambia la diapo 4
 a dos columnas") without naming the plugin.
