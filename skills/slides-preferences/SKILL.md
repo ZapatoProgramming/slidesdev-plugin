@@ -71,6 +71,6 @@ template. The same goes for `revelados paso a paso con clicks` in a
 An **Animaciones:** line that does not say "en loop", "con clicks",
 "variadas" or "ninguna" (older templates wrote `sutiles — v-clicks en listas
 y transición slide-left`) does not answer the animation question. Ask it
-once, as in "Animations: loops first, in CSS" in
+once, as in "Animations: loops first, without JavaScript" in
 [`../slides-create/SKILL.md`](../slides-create/SKILL.md), and update the line
 with the answer.

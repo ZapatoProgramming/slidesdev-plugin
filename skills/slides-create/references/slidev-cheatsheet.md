@@ -70,10 +70,13 @@ Other per-slide keys: `class: text-center`, `background: /bg.jpg`,
 
 Loops come before clicks: reach for one first, and use the click animations
 below only when the **Animaciones:** preference is "con clicks" or
-"variadas" (see "Animations: loops first, in CSS" in `SKILL.md`).
+"variadas" (see "Animations: loops first, without JavaScript" in `SKILL.md`).
 
-Continuous motion is CSS only, so it keeps moving in `npm run export:html`
-(no JavaScript there). Never `setInterval` or `requestAnimationFrame` for it.
+Continuous motion is CSS first, so it keeps moving in `npm run export:html`
+(no JavaScript there). When the motion changes SVG geometry (line ends, a
+path's `d`, a dot along a curve) or many elements must share one clock, use
+SMIL instead (see "SMIL" in "Diagrams"). Never `setInterval` or
+`requestAnimationFrame`.
 
 - UnoCSS: `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`.
   Slower or faster: `style="animation-duration: 4s"` on the element.
@@ -231,6 +234,76 @@ Building blocks to mix:
   names unique per slide (`.flujo-auth`, `.flujo-pago`) when two slides
   differ.
 
+**SMIL — SVG geometry and one clock.** `<animate>`, `<animateTransform>` and
+`<animateMotion>` inside the `<svg>`, for what CSS does not move well in
+every browser: a dot along a curve, a line that turns, a path that changes
+shape, gears in sync, a diagram that loops through its steps. No JavaScript,
+so it keeps moving in `slides-export.html`. Render the animation elements
+with `v-if="!isPrintMode"`: the `style.css` block does not stop SMIL, and
+the static attributes are what the PDF shows.
+
+```html
+<script setup>
+import { useNav } from '@slidev/client'
+const { isPrintMode } = useNav()
+</script>
+
+<svg viewBox="0 0 400 200" class="w-120 mx-auto">
+  <path d="M20 160 Q200 -40 380 160" fill="none" stroke="#14b8a6" stroke-width="3" />
+  <!-- a dot along the curve: it only exists while moving, so not in the PDF -->
+  <circle v-if="!isPrintMode" r="7" fill="#fbbf24">
+    <animateMotion path="M20 160 Q200 -40 380 160" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <!-- a line that turns around (200, 100); the PDF shows it at rest -->
+  <line x1="200" y1="100" x2="260" y2="100" stroke="#f472b6" stroke-width="4">
+    <animateTransform v-if="!isPrintMode" attributeName="transform" type="rotate"
+      from="0 200 100" to="360 200 100" dur="4s" repeatCount="indefinite" />
+  </line>
+</svg>
+```
+
+- **One clock per `<svg>`**: all SMIL inside it shares a timeline, which
+  starts when the `<svg>` is mounted, not when the slide is shown (Slidev
+  mounts neighboring slides early). Put every step of a diagram in the same
+  `<svg>`, with the same `dur`.
+- **Colors interpolate, text does not**: `<animate attributeName="stroke">`
+  or `fill` blends colors. For a counter, stack several `<text>` in the same
+  place and switch them with `calcMode="discrete"`, moving the `1` in
+  `values` for each one (this is the second of three):
+  `<animate attributeName="opacity" values="0;1;0" keyTimes="0;.33;.66" calcMode="discrete" dur="3s" repeatCount="indefinite" />`.
+- **Never `opacity="1"` as an attribute** (it becomes UnoCSS `opacity-1`, 1 %):
+  leave it out for 1 (`:opacity="on ? undefined : 0"`); `opacity="0"` is fine.
+- **Diagram that loops through its steps**: one helper takes an attribute's
+  value at each step and returns the `<animate>` props; the static
+  attributes are the last step. It needs a `<script setup>`, so such a
+  diagram usually lives in `components/*.vue`:
+
+```ts
+const T = [0, 1, 2.5, 4] // second at which step k starts
+const D = 7 // length of one loop; at the end everything goes back to step 0
+// value of one attribute at each step → props for <animate v-bind> (null if it never changes)
+function track(attributeName: string, vals: (number | string)[]) {
+  if (vals.every(v => v === vals[0])) return null
+  const times = [0]
+  const out = [vals[0]]
+  for (let k = 1; k < vals.length; k++) {
+    if (vals[k] === vals[k - 1]) continue
+    times.push(T[k], T[k] + 0.4)
+    out.push(vals[k - 1], vals[k])
+  }
+  times.push(D - 0.4, D)
+  out.push(vals[vals.length - 1], vals[0])
+  return { attributeName, dur: `${D}s`, repeatCount: 'indefinite', values: out.join(';'), keyTimes: times.map(t => (t / D).toFixed(4)).join(';') }
+}
+```
+
+```html
+<!-- node that lights up at step 2; at rest (PDF) it shows step 3 -->
+<circle cx="80" cy="60" r="20" stroke="#fbbf24" fill="none" stroke-width="3">
+  <animate v-if="!isPrintMode" v-bind="track('stroke', ['#475569', '#475569', '#fbbf24', '#fbbf24'])" />
+</circle>
+```
+
 **B. Big or special diagrams → Mermaid with animated edges.** More than ~6
 nodes, several branches or crossings, or a sequence, state, class, ER or
 Gantt diagram. Name each edge (`e1@-->`) and set `animate: true` so its dashes
@@ -361,6 +434,8 @@ the PDF:
 | `filter: blur()` / `drop-shadow()` / `backdrop-filter` | nothing, or a gradient |
 | `background-clip: text` (gradient text) | solid `color` |
 | a loop whose base style is incomplete (it only looks right mid-animation) | base style = complete picture; `style.css` exports loops at rest |
+| SMIL `<animate…>` always rendered (`animation: none` does not stop it) | `v-if="!isPrintMode"`; static SVG attributes = final state |
+| `opacity="1"` as an attribute (UnoCSS attributify → `opacity-1` = 1 %) | leave it out: `:opacity="on ? undefined : 0"`; `opacity="0"` is fine |
 
 ```css
 /* glow that survives PDF export */

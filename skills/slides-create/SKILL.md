@@ -23,8 +23,8 @@ minute of talk, plus cover and closing.
 
 If the **Animaciones:** preference does not say "en loop", "con clicks",
 "variadas" or "ninguna" (e.g. an AGENTS.md written by an older version of the
-plugin), add the animation question from "Animations: loops first, in CSS"
-below to that same message.
+plugin), add the animation question from "Animations: loops first, without
+JavaScript" below to that same message.
 
 If the deck is about the current repository, read the relevant code/docs first
 so the content is accurate, and cite real file names.
@@ -78,8 +78,8 @@ syntax. Work in two passes:
    - Vary layouts (`cover`, `section`, `two-cols`, `image-right`, `fact`,
      `center`, `end`) instead of bullet after bullet.
    - Animations according to the **Animaciones:** preference (en loop / con
-     clicks / variadas / ninguna), following "Animations: loops first, in
-     CSS" below.
+     clicks / variadas / ninguna), following "Animations: loops first, without
+     JavaScript" below.
    - Code blocks with stepped highlighting, when useful.
    - Diagrams, when useful. **By default, draw them in HTML/SVG with CSS
      loop animations** (arrows that flow, a packet that travels between
@@ -104,7 +104,7 @@ syntax. Work in two passes:
 For decks over ~25 slides, split sections into `pages/*.md` and import them
 with `src:`.
 
-### Animations: loops first, in CSS
+### Animations: loops first, without JavaScript
 
 Loops come before clicks. The **Animaciones:** preference picks the mode:
 
@@ -128,23 +128,44 @@ primero y clicks donde sumen)? Si no me dices nada, van en loop." Then offer
 to save the answer in **Animaciones:** (see
 [`../slides-preferences/SKILL.md`](../slides-preferences/SKILL.md)).
 
-Write the loops in CSS. `npm run export:html` turns the deck into
+Write the loops without JavaScript. `npm run export:html` turns the deck into
 `slides-export.html`, HTML + CSS without JavaScript, the file the user shares:
 it opens in any browser and in the iPhone's file preview, one slide per
-screen, scaled to fit, swiped sideways. CSS animations keep moving there;
-anything driven by JavaScript stays still. So:
+screen, scaled to fit, swiped sideways. CSS and SMIL animations keep moving
+there; anything driven by JavaScript stays still. So:
 
-- **Loops and continuous motion are CSS only**: `@keyframes` in a slide's
-  `<style>` or UnoCSS `animate-spin`, `animate-pulse`, `animate-bounce`,
-  `animate-ping`. Never `setInterval`, `requestAnimationFrame`, JS timers or
-  JS animation libraries for them.
+- **CSS first**: `@keyframes` in a slide's `<style>` or UnoCSS
+  `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`, for
+  anything that is `opacity`, `transform` or `stroke-dashoffset` on separate
+  elements: arrows that flow, a packet that travels in a straight line, a
+  pulse, a ring that turns.
+- **SMIL** (`<animate>`, `<animateTransform>`, `<animateMotion>` inside the
+  `<svg>`) when the motion changes SVG geometry — a line's `x1`/`y1`, a
+  path's `d`, a dot that follows a curve (`<animateMotion path>`), gears
+  that turn together — or when many elements must share one timeline, like
+  a diagram that loops through its steps (color, width and opacity changing
+  on many elements at once). All SMIL in one `<svg>` shares a clock; CSS
+  starts counting when each element is shown. Patterns: "SMIL" in "Diagrams"
+  in the cheatsheet. Two rules:
+  - Render the animation elements only outside print:
+    `v-if="!isPrintMode"`, with `const { isPrintMode } = useNav()` from
+    `@slidev/client` in a `<script setup>`. The `animation: none` block in
+    `style.css` does not stop SMIL, so the static attributes of the SVG must
+    be the complete final state: that is what the PDF shows.
+  - Each `<svg>` starts its clock when it is mounted, not when its slide is
+    shown, and Slidev mounts neighboring slides early, so a loop may be
+    mid-cycle when you get there. Keep all the steps of a diagram in the same
+    `<svg>`, with the same `dur`.
+- **JavaScript never for loops**: no `setInterval`, `requestAnimationFrame`,
+  JS timers or JS animation libraries.
 - **Entrances and steps are fine as they are**: `v-click`, `v-clicks`,
   `v-motion` and `<v-switch>` use JavaScript, but every export shows their
   final state, so the content is all there; only the step-by-step is left to
   `npm run dev`.
 - **When the motion itself is the content** (a counter, a typing effect, a
-  simulation, an algorithm that computes its steps), first try CSS:
-  `steps()`, one `animation-delay` per element, several `@keyframes`. If it
+  simulation, an algorithm that computes its steps), first try CSS
+  (`steps()`, one `animation-delay` per element, several `@keyframes`) or
+  SMIL (a counter as several `<text>` switched with `calcMode="discrete"`). If it
   really needs JavaScript, say so in one line before writing it — e.g. "Esta
   animación necesita JavaScript: se ve en `npm run dev` y en el link, pero
   en el HTML (`npm run export:html`) saldrá quieta." — and go ahead with it.
@@ -170,8 +191,16 @@ differently from the screen. Design so the deck looks the same in both:
   in `style.css`), so each loop must look complete without motion: lines and
   nodes visible in their base style, and anything that only exists while
   moving (a traveling packet) starts at `opacity: 0` in its base
-  style. Animated diagrams export as their last step, so that step must be
-  the complete diagram.
+  style. That block does not stop SMIL: render `<animate>`,
+  `<animateTransform>` and `<animateMotion>` with `v-if="!isPrintMode"` and
+  make the SVG's static attributes the complete final state. Animated
+  diagrams export as their last step, so that step must be the complete
+  diagram.
+- **Never `opacity="1"` as an attribute**, on any element: Slidev's UnoCSS
+  attributify turns it into the `opacity-1` utility
+  (`[opacity~="1"]{opacity:0.01}`), so the element ends up at 1 %. On screen
+  a running SMIL animation can hide it; in the PDF it shows. For 1, leave the
+  attribute out (`:opacity="on ? undefined : 0"`); `opacity="0"` is fine.
 - **Math only in Markdown context**: `$…$`/`$$…$$` are not rendered inside
   an HTML element on the same line (`<div>$x$</div>` shows the raw LaTeX).
   Close the HTML, leave a blank line, write the formula, leave a blank line
@@ -185,7 +214,9 @@ by default: style with UnoCSS classes and per-slide `<style>` blocks. Add to
 `style.css` only styles repeated across many slides (keeping its two
 blocks), and create a
 `components/*.vue` file only for something Markdown + UnoCSS cannot do (loop
-diagrams fit in `slides.md` with a `<style>` block). Every extra file is one
+diagrams fit in `slides.md` with a `<style>` block; a SMIL diagram that loops
+through many steps, built with a helper like `track()`, is a fair reason for
+a component). Every extra file is one
 more write that can be
 blocked (see "If a write is blocked" below).
 

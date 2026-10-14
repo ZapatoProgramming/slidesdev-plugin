@@ -48,12 +48,14 @@ for syntax. Guidelines:
   when the user asked for steps ("que aparezca por pasos") or the
   **Animaciones:** preference is "con clicks" or "variadas". New diagrams
   follow the diagram rule in [`../slides-create/SKILL.md`](../slides-create/SKILL.md).
-- New or changed animations follow "Animations: loops first, in CSS" in
-  [`../slides-create/SKILL.md`](../slides-create/SKILL.md): when the user asks
-  to animate something without saying how ("anímala", "dale movimiento"),
-  write a CSS loop, not a click, unless the **Animaciones:** preference is
-  "con clicks". Give a one-line warning before writing motion that needs
-  JavaScript (it will look still in `slides-export.html`).
+- New or changed animations follow "Animations: loops first, without
+  JavaScript" in [`../slides-create/SKILL.md`](../slides-create/SKILL.md):
+  when the user asks to animate something without saying how ("anímala",
+  "dale movimiento"), write a loop, not a click, unless the **Animaciones:**
+  preference is "con clicks". Write it in CSS, or SMIL when the motion is SVG
+  geometry or a synchronized diagram; never JavaScript. Give a one-line
+  warning before writing motion that needs JavaScript (it will look still in
+  `slides-export.html`).
 - Theme change: update headmatter `theme:` **and** add the theme package to
   `package.json`; tell the user to run `npm install`.
 - New images: never invent URLs; use files in `public/` or leave a TODO.
@@ -164,7 +166,8 @@ writes `slides-ios.html`. The export is current when the deck's
    no longer used.
 4. Check the deck's loops: any made with `setInterval` or
    `requestAnimationFrame` will look still in the HTML. Offer to rewrite
-   them in CSS. Components that switch to a static layout with
+   them in CSS, or SMIL when the motion is SVG geometry or a synchronized
+   diagram. Components that switch to a static layout with
    `useNav().isPrintMode` keep working as they are.
 5. Tell the user to run `npm install`, then `npm run export:html`. If
    Chromium is missing, `npx playwright install chromium` once.

@@ -2,7 +2,9 @@
 // vite.config.ts). Builds a minimal deck from the starter, generates
 // slides-export.html and opens it with JavaScript off, in WebKit (the iPhone)
 // and Chromium: each slide must fit the screen and touch two opposite edges,
-// and → must move one slide at a time.
+// → must move one slide at a time, and SMIL must keep moving. It also opens
+// Slidev's print view (what `npm run export` prints) to check that SMIL
+// elements rest at their final state there.
 //
 // Usage: node --test tests/export-html.test.mjs
 // Slow the first time: it runs `npm install` in a temporary folder and
@@ -24,7 +26,9 @@ const keepDeck = !!process.env.SLIDES_TEST_DECK
 const deck = keepDeck ? resolve(process.env.SLIDES_TEST_DECK) : mkdtempSync(join(tmpdir(), 'slides-html-'))
 
 // Four slides: with three, a → that skipped a slide would still end on the
-// last one and the scroll check could not tell.
+// last one and the scroll check could not tell. Slide 1 has SMIL written as
+// slides-create asks: animations only outside print, static attributes = final
+// state, and no opacity="1".
 const SLIDES = `---
 theme: default
 title: export:html
@@ -32,6 +36,20 @@ transition: slide-left
 ---
 
 # Uno
+
+<script setup>
+import { useNav } from '@slidev/client'
+const { isPrintMode } = useNav()
+</script>
+
+<svg id="smil-test" viewBox="0 0 200 40" width="200" height="40">
+  <circle id="smil-dot" cx="180" cy="20" r="8" fill="#14b8a6">
+    <animate v-if="!isPrintMode" attributeName="cx" values="20;180" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle id="smil-fade" cx="100" cy="20" r="8" fill="#fbbf24">
+    <animate v-if="!isPrintMode" attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>
 
 ---
 
@@ -128,5 +146,49 @@ for (const browserName of ['webkit', 'chromium']) {
         }
       })
     }
+
+    test('SMIL keeps moving', async () => {
+      const context = await browser.newContext({ javaScriptEnabled: false })
+      try {
+        const page = await context.newPage()
+        await page.goto(pathToFileURL(join(deck, 'slides-export.html')).href)
+        const cxAt = t => page.evaluate((t) => {
+          const svg = document.querySelector('#smil-test')
+          svg.pauseAnimations()
+          svg.setCurrentTime(t)
+          return document.querySelector('#smil-dot').cx.animVal.value
+        }, t)
+        const early = await cxAt(0.3)
+        const later = await cxAt(1.3)
+        assert.ok(Math.abs(later - early) > 1,
+          `the SMIL dot did not move: cx is ${early} at 0.3 s and ${later} at 1.3 s`)
+      }
+      finally {
+        await context.close()
+      }
+    })
   })
 }
+
+// Slidev's print view, the one `npm run export` turns into the PDF. It needs
+// JavaScript and prints with Chromium.
+describe('print view in chromium', () => {
+  test('SMIL rests at its final state', async () => {
+    const browser = await playwright.chromium.launch()
+    try {
+      const page = await browser.newPage()
+      await page.emulateMedia({ media: 'print' })
+      await page.goto(`${pathToFileURL(join(deck, '.slidev', 'html', 'index.html')).href}?print=true#/print`)
+      await page.waitForSelector('#smil-fade', { state: 'attached' })
+      const fade = await page.evaluate(() => {
+        const el = document.querySelector('#smil-fade')
+        return { animations: el.querySelectorAll('animate').length, opacity: getComputedStyle(el).opacity }
+      })
+      assert.equal(fade.animations, 0, 'the <animate> is still there in print mode (missing v-if="!isPrintMode")')
+      assert.equal(fade.opacity, '1', `the animated element prints at opacity ${fade.opacity}, expected 1`)
+    }
+    finally {
+      await browser.close()
+    }
+  })
+})

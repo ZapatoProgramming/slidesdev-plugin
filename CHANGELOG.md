@@ -6,6 +6,17 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14
+
+### Added
+- `tests/export-html.test.mjs` comprueba también que SMIL se mueve en `slides-export.html` con JavaScript apagado (WebKit y Chromium) y que en la vista de impresión de Slidev queda en su estado final, con opacidad 1.
+
+### Changed
+- Regla de animaciones: de "los loops son solo CSS" a CSS primero, SMIL (`<animate>`, `<animateTransform>`, `<animateMotion>`) cuando el movimiento cambia geometría SVG (puntas de una línea, el `d` de un path, un punto que sigue una curva, engranajes) o muchos elementos necesitan un mismo reloj (un diagrama que recorre sus pasos en bucle), y JavaScript nunca. SMIL también se mueve en `slides-export.html`. El cheatsheet trae un patrón SMIL con `v-if="!isPrintMode"`, el contador con `calcMode="discrete"` y el helper `track()` para diagramas por pasos; la sección de `slides-create` pasa a llamarse "Animations: loops first, without JavaScript".
+
+### Fixed
+- Documentada la trampa de `opacity="1"` como atributo: el *attributify* de UnoCSS que trae Slidev lo convierte en `opacity-1` y el elemento queda al 1 %, cosa que se nota en el PDF. Va en "Must survive `npm run export` (PDF)" y en el cheatsheet, junto con que el bloque `animation: none` de `style.css` no detiene SMIL.
+
 ## [0.4.0] - 2026-10-14
 
 ### Added
