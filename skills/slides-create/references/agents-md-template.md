@@ -1,6 +1,6 @@
 ## Presentaciones
 
-Preferencias para las presentaciones Slidev generadas por el plugin `slides`.
+Preferencias para las presentaciones Slidev generadas por el plugin `slides-dev-plugin`.
 
 - **Idioma:** español
 - **Tema Slidev:** default

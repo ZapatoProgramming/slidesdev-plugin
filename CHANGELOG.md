@@ -6,6 +6,11 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-14
+
+### Changed
+- El plugin se llama `slides-dev-plugin` (antes `slides`): el comando pasa a `/slides-dev-plugin:new` (en OpenCode `/slides-dev-plugin-new`), los skills a `slides-dev-plugin:slides-create`, etc., y se instala como `slides-dev-plugin@slidesdev`. En Claude Code el marketplace declara el cambio con `renames`, y basta con instalar una vez `slides-dev-plugin@slidesdev`; en Codex, Antigravity y OpenCode hay que quitar el viejo y añadir el nuevo (ver "¿Tenías la versión anterior?" en el README).
+
 ## [0.2.0] - 2026-10-14
 
 ### Added

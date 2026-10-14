@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "slides",
+      "name": "slides-dev-plugin",
       "source": {
         "source": "local",
         "path": "./"

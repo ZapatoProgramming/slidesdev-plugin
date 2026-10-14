@@ -157,4 +157,4 @@ if (errors.length) {
   for (const e of errors) console.error(`  - ${e}`)
   process.exit(1)
 }
-console.log(`✓ slides ${version}: manifests, ${skills.length} skills and starter template look good`)
+console.log(`✓ ${claudePlugin?.name} ${version}: manifests, ${skills.length} skills and starter template look good`)

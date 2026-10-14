@@ -1,4 +1,4 @@
-# slides — presentaciones Slidev desde Claude Code, Codex, Antigravity y OpenCode
+# slides-dev-plugin — presentaciones Slidev desde Claude Code, Codex, Antigravity y OpenCode
 
 Plugin para **Claude Code**, **Codex**, **Antigravity** y **OpenCode** que crea presentaciones
 [Slidev](https://sli.dev) en la carpeta donde abras el agente y te deja
@@ -27,14 +27,14 @@ Dentro de Claude Code:
 
 ```text
 /plugin marketplace add ZapatoProgramming/slidesdev-plugin
-/plugin install slides@slidesdev
+/plugin install slides-dev-plugin@slidesdev
 ```
 
 Reinicia la sesión y listo. Para actualizar, desde la terminal:
 
 ```bash
 claude plugin marketplace update slidesdev
-claude plugin update slides@slidesdev
+claude plugin update slides-dev-plugin@slidesdev
 ```
 
 O deja que se actualice solo: en `/plugin` → **Marketplaces** → `slidesdev` →
@@ -47,14 +47,14 @@ En la terminal:
 
 ```bash
 codex plugin marketplace add ZapatoProgramming/slidesdev-plugin
-codex plugin add slides@slidesdev
+codex plugin add slides-dev-plugin@slidesdev
 ```
 
 Abre una sesión nueva de Codex. Para actualizar:
 
 ```bash
 codex plugin marketplace upgrade slidesdev
-codex plugin remove slides@slidesdev && codex plugin add slides@slidesdev
+codex plugin remove slides-dev-plugin@slidesdev && codex plugin add slides-dev-plugin@slidesdev
 ```
 
 ### Antigravity
@@ -66,7 +66,7 @@ agy plugin install https://github.com/ZapatoProgramming/slidesdev-plugin
 ```
 
 Abre una sesión nueva de `agy`. Para actualizar, vuelve a correr el mismo
-comando; para quitarlo, `agy plugin uninstall slides`.
+comando; para quitarlo, `agy plugin uninstall slides-dev-plugin`.
 
 ### OpenCode
 
@@ -76,13 +76,31 @@ del proyecto):
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["slides@git+https://github.com/ZapatoProgramming/slidesdev-plugin.git"]
+  "plugin": ["slides-dev-plugin@git+https://github.com/ZapatoProgramming/slidesdev-plugin.git"]
 }
 ```
 
 Reinicia OpenCode. Se queda en caché el commit que resolvió la primera
 vez; para actualizar, borra
-`~/.cache/opencode/packages/slides@git+https:` y reinicia.
+`~/.cache/opencode/packages/slides-dev-plugin@git+https:` y reinicia.
+
+### ¿Tenías la versión anterior (`slides`)?
+
+Desde la 0.3.0 el plugin se llama `slides-dev-plugin` y su comando es
+`/slides-dev-plugin:new`. Para pasarte al nombre nuevo:
+
+- **Claude Code:** `claude plugin marketplace update slidesdev` en la
+  terminal y luego, dentro de Claude Code, `/plugin install
+  slides-dev-plugin@slidesdev` una vez. El marketplace avisa del cambio de
+  nombre y conserva si lo tenías activado.
+- **Codex:** `codex plugin remove slides@slidesdev`, luego
+  `codex plugin marketplace upgrade slidesdev` y
+  `codex plugin add slides-dev-plugin@slidesdev`.
+- **Antigravity:** `agy plugin uninstall slides` y vuelve a instalarlo con el
+  comando de arriba.
+- **OpenCode:** cambia en tu `opencode.json` `slides@git+…` por
+  `slides-dev-plugin@git+…`, borra `~/.cache/opencode/packages/slides@git+https:`
+  y reinicia.
 
 ---
 
@@ -94,10 +112,10 @@ Abre tu agente **en la carpeta donde quieras la presentación** y pídela:
 Hazme una presentación de 15 minutos sobre la arquitectura de este repo para el equipo nuevo
 ```
 
-En Claude Code también tienes un atajo (en OpenCode es `/slides-new`):
+En Claude Code también tienes un atajo (en OpenCode es `/slides-dev-plugin-new`):
 
 ```text
-/slides:new charla de 10 min sobre Docker para principiantes
+/slides-dev-plugin:new charla de 10 min sobre Docker para principiantes
 ```
 
 El plugin:
@@ -240,9 +258,9 @@ Si ya tenías instalada la versión publicada, desinstálala antes para no tener
 dos copias activas:
 
 ```bash
-claude plugin uninstall slides@slidesdev
-codex plugin remove slides@slidesdev
-agy plugin uninstall slides
+claude plugin uninstall slides-dev-plugin@slidesdev
+codex plugin remove slides-dev-plugin@slidesdev
+agy plugin uninstall slides-dev-plugin
 # OpenCode: quita la línea del plugin de tu opencode.json
 ```
 
@@ -256,7 +274,7 @@ cd playground
 claude --plugin-dir ..
 ```
 
-- **¿Cargó?** Escribe `/slides:` y debe autocompletar `/slides:new`.
+- **¿Cargó?** Escribe `/slides-dev-plugin:` y debe autocompletar `/slides-dev-plugin:new`.
 - **Tras editar un skill:** sal (`/exit`) y vuelve a lanzar el mismo comando.
   Los skills se leen al iniciar la sesión.
 
@@ -266,8 +284,8 @@ Registra el repo como marketplace local e instala el plugin:
 
 ```bash
 codex plugin marketplace add "$(pwd)"
-codex plugin add slides@slidesdev
-codex plugin list | grep slides     # debe salir: slides@slidesdev  installed, enabled
+codex plugin add slides-dev-plugin@slidesdev
+codex plugin list | grep slides-dev-plugin     # debe salir: slides-dev-plugin@slidesdev  installed, enabled
 ```
 
 Luego abre Codex en `playground/`:
@@ -280,7 +298,7 @@ cd playground && codex
   reinstala y abre una sesión nueva:
 
   ```bash
-  codex plugin remove slides@slidesdev && codex plugin add slides@slidesdev
+  codex plugin remove slides-dev-plugin@slidesdev && codex plugin add slides-dev-plugin@slidesdev
   ```
 
 ### 2c. Antigravity
@@ -329,8 +347,8 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 10 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
 | 11 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
 
-En Claude Code prueba también `/slides:new charla sobre testing`, y en OpenCode
-`/slides-new charla sobre testing`.
+En Claude Code prueba también `/slides-dev-plugin:new charla sobre testing`, y en OpenCode
+`/slides-dev-plugin-new charla sobre testing`.
 
 ### 4. Probar las preferencias globales
 
@@ -348,9 +366,9 @@ distintos (p. ej. idioma) y comprueba que gana el de `playground/AGENTS.md`.
 
 ```bash
 rm -rf playground && mkdir playground          # empezar de cero
-codex plugin remove slides@slidesdev             # quitar la versión de desarrollo de Codex
+codex plugin remove slides-dev-plugin@slidesdev             # quitar la versión de desarrollo de Codex
 codex plugin marketplace remove slidesdev
-agy plugin uninstall slides                      # quitar la versión de desarrollo de Antigravity
+agy plugin uninstall slides-dev-plugin           # quitar la versión de desarrollo de Antigravity
 ```
 
 En Claude Code con `--plugin-dir` no hay nada que limpiar. En OpenCode basta
@@ -368,12 +386,12 @@ con borrar `playground/` (el `opencode.json` vive ahí).
 .agents/plugins/         marketplace de Codex
 plugin.json              manifest de Antigravity
 package.json             paquete del plugin de OpenCode
-.opencode/plugins/       adaptador de OpenCode (registra skills/ y /slides-new)
+.opencode/plugins/       adaptador de OpenCode (registra skills/ y /slides-dev-plugin-new)
 skills/                  compartidos por todos los agentes
   slides-create/         crear presentación (+ references/ y assets/starter/)
   slides-edit/           editar slides existentes (auto-activación)
   slides-preferences/    leer/crear/actualizar AGENTS.md
-commands/new.md          /slides:new (Claude Code; /slides-new en OpenCode)
+commands/new.md          /slides-dev-plugin:new (Claude Code; /slides-dev-plugin-new en OpenCode)
 scripts/validate.mjs     chequeos estáticos (manifests, skills, links)
 ```
 

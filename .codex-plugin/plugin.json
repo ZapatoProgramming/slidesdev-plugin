@@ -1,6 +1,6 @@
 {
-  "name": "slides",
-  "version": "0.2.0",
+  "name": "slides-dev-plugin",
+  "version": "0.3.0",
   "description": "Crea y edita presentaciones Slidev en el directorio actual, siguiendo tus preferencias guardadas en AGENTS.md.",
   "author": {
     "name": "ZapatoProgramming",

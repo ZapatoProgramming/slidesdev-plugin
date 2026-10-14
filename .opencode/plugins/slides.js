@@ -1,6 +1,6 @@
 // Adapter for OpenCode (https://opencode.ai). The skills in skills/ stay the
 // single source of truth; this file only tells OpenCode where they are and
-// exposes commands/new.md as the /slides-new command, both from the `config`
+// exposes commands/new.md as the /slides-dev-plugin-new command, both from the `config`
 // hook.
 
 import fs from 'node:fs'
@@ -23,14 +23,14 @@ function splitFrontmatter(text) {
   return { data, body: match[2] }
 }
 
-// commands/<name>.md → { "slides-<name>": { template, description } }
+// commands/<name>.md → { "slides-dev-plugin-<name>": { template, description } }
 function readCommands() {
   const commands = {}
   if (!fs.existsSync(commandsDir)) return commands
   for (const file of fs.readdirSync(commandsDir)) {
     if (!file.endsWith('.md')) continue
     const { data, body } = splitFrontmatter(fs.readFileSync(path.join(commandsDir, file), 'utf8'))
-    commands[`slides-${file.slice(0, -3)}`] = {
+    commands[`slides-dev-plugin-${file.slice(0, -3)}`] = {
       template: body.trim(),
       ...(data.description ? { description: data.description } : {}),
     }
@@ -54,4 +54,4 @@ export const SlidesPlugin = async () => ({
   },
 })
 
-export default { id: 'slides', server: SlidesPlugin }
+export default { id: 'slides-dev-plugin', server: SlidesPlugin }
