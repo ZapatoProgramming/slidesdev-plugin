@@ -21,7 +21,10 @@
      horizontal, un teléfono vertical y un escritorio; para
      `slides-export.html`, con JavaScript apagado y en WebKit, no solo en
      Chromium (el iPhone es WebKit), y corre
-     `node --test tests/export-html.test.mjs`.
+     `node --test tests/export-html.test.mjs`. Su único script es el de
+     pantalla completa: no toca el layout, y la presentación tiene que
+     funcionar igual donde no corre (vista previa del iPhone) o no hace nada
+     (Safari del iPhone). Lo demás va en CSS.
 4. Ejecuta `node scripts/validate.mjs`.
 5. Si tocas un skill, prueba el flujo en todos los agentes que puedas.
 6. Añade una línea en `CHANGELOG.md` bajo `[Unreleased]` y abre el PR.

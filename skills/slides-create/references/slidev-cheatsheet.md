@@ -466,12 +466,14 @@ the PDF:
   suggest `npx playwright install chromium` once.
   `npm run export -- --format pptx` or `--format png` for other formats.
 - `npm run export:html` — `slides-export.html`, the deck as HTML + CSS
-  without JavaScript in a single file: opens with a double click (no server,
-  no Node) and in the iPhone/iPad file preview (iOS 16+). Clicks revealed,
-  CSS loops moving, one slide per screen scaled to fit, sideways swipe to the
-  next one (← → on a computer). On a phone held upright the 16:9 slides leave
-  black bands (turn it sideways); on a computer the vertical mouse wheel does
-  not advance. No slide transitions or JavaScript-driven motion. Needs the
-  starter's `vite.config.ts`, `vite-plugin-singlefile` and Chromium (like
+  without the deck's JavaScript in a single file: opens with a double click
+  (no server, no Node) and in the iPhone/iPad file preview (iOS 16+). Clicks
+  revealed, CSS loops moving, one slide per screen scaled to fit, sideways
+  swipe to the next one (← → on a computer). Its only script toggles
+  fullscreen on double click (Esc leaves); on the iPhone it does nothing.
+  On a phone held upright the 16:9 slides leave black bands (turn it
+  sideways); on a computer the vertical mouse wheel does not advance. No
+  slide transitions or JavaScript-driven motion. Needs the starter's
+  `vite.config.ts`, `vite-plugin-singlefile` and Chromium (like
   `npm run export`).
 - `npm run build` — static SPA in `dist/` for hosting.

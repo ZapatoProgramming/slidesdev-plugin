@@ -117,16 +117,18 @@ touching `slides.md`:
 When the user wants to send or show the deck outside `npm run dev`
 ("pásamela en un archivo", "que la puedan abrir en otra compu", "expórtala a
 HTML", "quiero verla en el iPhone"), suggest `npm run export:html`. It writes
-`slides-export.html`: the deck as HTML + CSS without JavaScript, in one file
-with the images in `public/` inside. It opens with a double click in any
-browser, without Node or a server, and in the iPhone/iPad file preview (Files
-app, AirDrop), which does not run JavaScript.
+`slides-export.html`: the deck as HTML + CSS in one file with the images in
+`public/` inside. It opens with a double click in any browser, without Node or
+a server, and in the iPhone/iPad file preview (Files app, AirDrop), which does
+not run JavaScript.
 
 It plays as a presentation: one slide per screen, scaled to fit, and a
-sideways swipe moves to the next one (← → on a computer). The slides are
-16:9, so a phone held upright shows black bands above and below: suggest
-turning the phone sideways. On a computer the vertical mouse wheel does not
-advance; use ← →. On the iPhone it needs iOS 16 or later.
+sideways swipe moves to the next one (← → on a computer). A double click on
+the page toggles fullscreen and Esc leaves it (on a computer; on the iPhone it
+does nothing). The slides are 16:9, so a phone held upright shows black bands
+above and below: suggest turning the phone sideways. On a computer the
+vertical mouse wheel does not advance; use ← →. On the iPhone it needs iOS 16
+or later.
 
 Clicks come out already revealed, CSS loops keep moving and `v-motion`
 entrances show their final state. Motion made with JavaScript stays still,
@@ -141,14 +143,18 @@ starter's into a deck): an export has to look like a presentation — each
 slide fills the window and you move one slide at a time. Check it on a phone
 held sideways, a phone held upright and a desktop; for `slides-export.html`,
 with JavaScript off and in WebKit, not only in Chromium (the iPhone is
-WebKit).
+WebKit). Its only script is the fullscreen one: it must not touch the layout,
+and the deck must work the same where it does not run (iPhone file preview)
+or does nothing (iPhone Safari has no fullscreen). Anything else goes in CSS.
 
 ### Decks from older versions
 
 Decks made with plugin 0.3.0 or earlier have no `export:html`, or one whose
 file needs JavaScript (blank on the iPhone), or a separate `export:ios` that
 writes `slides-ios.html`. The export is current when the deck's
-`vite.config.ts` has `staticHtml()`. To update it:
+`vite.config.ts` has `staticHtml()`. Decks from 0.4.0–0.5.0 have it but no
+fullscreen on double click (no `dblclick` in `vite.config.ts`); when the user
+asks for it, step 1 is enough. To update it:
 
 1. Copy [`../slides-create/assets/starter/vite.config.ts`](../slides-create/assets/starter/vite.config.ts)
    into the deck. If the deck's `vite.config.ts` has options the plugin did

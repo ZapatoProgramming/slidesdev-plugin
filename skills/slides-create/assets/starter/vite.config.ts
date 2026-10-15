@@ -2,12 +2,14 @@
 // - `cssMinify: false`: con Slidev 53 + Vite 8, `npm run build` falla al
 //   minificar el CSS de Slidev ("lightningcss minify: Invalid token").
 // - `npm run export:html` genera slides-export.html: la presentación como
-//   HTML + CSS, sin JavaScript, en un solo archivo con las imágenes de public/
-//   dentro. Se abre con doble clic en cualquier navegador, sin servidor, y en
-//   la vista previa de archivos del iPhone/iPad (app Archivos, AirDrop), que
-//   no ejecuta JavaScript. Cada slide llena la pantalla y se pasa con swipe
-//   lateral (← → en la compu). Los clicks salen revelados, los loops de CSS
-//   siguen moviéndose y lo que dependa de JavaScript queda quieto.
+//   HTML + CSS en un solo archivo con las imágenes de public/ dentro. Se abre
+//   con doble clic en cualquier navegador, sin servidor, y en la vista previa
+//   de archivos del iPhone/iPad (app Archivos, AirDrop), que no ejecuta
+//   JavaScript. Cada slide llena la pantalla y se pasa con swipe lateral
+//   (← → en la compu). Los clicks salen revelados, los loops de CSS siguen
+//   moviéndose y lo que dependa de JavaScript queda quieto. Su único script
+//   pone la pantalla completa con doble clic (Esc para salir); sin él la
+//   presentación funciona igual.
 import type { Plugin, UserConfig } from 'vite'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
@@ -130,7 +132,8 @@ const PAGE_HEAD = `({
 const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 
 // Abre el build de un solo archivo en Chromium, recorre las slides en su último
-// click y guarda el DOM ya dibujado, sin scripts, en slides-export.html
+// click y guarda el DOM ya dibujado, sin scripts, en slides-export.html. Solo
+// le suma el script de pantalla completa, que no toca el layout
 function staticHtml(): Plugin {
   let outDir = ''
 
@@ -206,6 +209,23 @@ html, body { height: 100% !important; overflow: hidden !important; margin: 0 !im
 <main class="export-deck" tabindex="-1" autofocus>
 ${deck.slides.map((no: number) => `<section class="export-slide">${slides.get(no) ?? ''}</section>`).join('\n')}
 </main>
+<script>
+/* Doble clic: pantalla completa; Esc (lo hace el navegador) o otro doble clic
+   para salir. Es un extra: donde no corre JavaScript (vista previa del iPhone)
+   o no hay pantalla completa (Safari del iPhone) no hace nada, y la
+   presentación funciona igual. */
+(() => {
+  const root = document.documentElement
+  const enter = root.requestFullscreen || root.webkitRequestFullscreen
+  const exit = document.exitFullscreen || document.webkitExitFullscreen
+  if (!enter || !exit) return
+  document.addEventListener('dblclick', () => {
+    getSelection()?.removeAllRanges()
+    const full = document.fullscreenElement || document.webkitFullscreenElement
+    Promise.resolve(full ? exit.call(document) : enter.call(root)).catch(() => {})
+  })
+})()
+</script>
 </body>
 </html>
 `

@@ -2,9 +2,11 @@
 // vite.config.ts). Builds a minimal deck from the starter, generates
 // slides-export.html and opens it with JavaScript off, in WebKit (the iPhone)
 // and Chromium: each slide must fit the screen and touch two opposite edges,
-// → must move one slide at a time, and SMIL must keep moving. It also opens
-// Slidev's print view (what `npm run export` prints) to check that SMIL
-// elements rest at their final state there.
+// → must move one slide at a time, and SMIL must keep moving. With JavaScript
+// on, its only script must toggle fullscreen on double click without moving
+// the slide, and do nothing where the Fullscreen API is missing (iPhone
+// Safari). It also opens Slidev's print view (what `npm run export` prints) to
+// check that SMIL elements rest at their final state there.
 //
 // Usage: node --test tests/export-html.test.mjs
 // Slow the first time: it runs `npm install` in a temporary folder and
@@ -13,7 +15,7 @@
 
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -104,6 +106,22 @@ async function settledScrollLeft(page) {
   return last
 }
 
+// Waits until .export-deck has scrolled to `expected` (needs JavaScript on)
+async function scrollsTo(page, expected) {
+  await page.waitForFunction(x => Math.abs(document.querySelector('.export-deck').scrollLeft - x) <= 1, expected, { timeout: 5000 })
+    .catch(() => {})
+  return page.evaluate(() => document.querySelector('.export-deck').scrollLeft)
+}
+
+const fullscreen = page => page.evaluate(() => !!(document.fullscreenElement || document.webkitFullscreenElement))
+
+test('the only script is the fullscreen one', () => {
+  const html = readFileSync(join(deck, 'slides-export.html'), 'utf8')
+  const scripts = html.match(/<script\b/g) ?? []
+  assert.equal(scripts.length, 1, `slides-export.html has ${scripts.length} <script> tags, expected only the fullscreen one`)
+  assert.match(html, /addEventListener\('dblclick'/, 'the script does not listen for double clicks')
+})
+
 for (const browserName of ['webkit', 'chromium']) {
   describe(`slides-export.html in ${browserName}, JavaScript off`, () => {
     let browser
@@ -162,6 +180,79 @@ for (const browserName of ['webkit', 'chromium']) {
         const later = await cxAt(1.3)
         assert.ok(Math.abs(later - early) > 1,
           `the SMIL dot did not move: cx is ${early} at 0.3 s and ${later} at 1.3 s`)
+      }
+      finally {
+        await context.close()
+      }
+    })
+  })
+
+  // Esc is the browser's own way out of fullscreen; headless Chromium has no
+  // browser UI to handle it, so only the double click is checked here.
+  describe(`slides-export.html in ${browserName}, JavaScript on`, () => {
+    let browser
+
+    before(async () => {
+      browser = await playwright[browserName].launch()
+    })
+
+    after(() => browser?.close())
+
+    test('double click toggles fullscreen and keeps the slide', async () => {
+      const vw = 1440
+      const context = await browser.newContext({ viewport: { width: vw, height: 900 } })
+      try {
+        const page = await context.newPage()
+        const errors = []
+        page.on('pageerror', e => errors.push(e.message))
+        await page.goto(pathToFileURL(join(deck, 'slides-export.html')).href)
+        await page.keyboard.press('ArrowRight')
+        assert.ok(near(await scrollsTo(page, vw), vw), 'ArrowRight did not reach slide 2')
+
+        // On a title, where a double click would also select a word
+        const title = await page.locator('.export-slide h1').nth(1).boundingBox()
+        await page.mouse.dblclick(title.x + 10, title.y + title.height / 2)
+        await page.waitForFunction(() => !!(document.fullscreenElement || document.webkitFullscreenElement), null, { timeout: 5000 })
+          .catch(() => {})
+        assert.ok(await fullscreen(page), 'double click did not enter fullscreen')
+        assert.equal(await page.evaluate(() => String(getSelection())), '', 'double click left text selected')
+        assert.ok(near(await page.evaluate(() => document.querySelector('.export-deck').scrollLeft), vw),
+          'entering fullscreen moved away from slide 2')
+
+        // ← → still work in fullscreen
+        await page.keyboard.press('ArrowRight')
+        assert.ok(near(await scrollsTo(page, 2 * vw), 2 * vw), 'ArrowRight did not move one slide in fullscreen')
+
+        await page.mouse.dblclick(vw / 2, 450)
+        await page.waitForFunction(() => !(document.fullscreenElement || document.webkitFullscreenElement), null, { timeout: 5000 })
+          .catch(() => {})
+        assert.ok(!await fullscreen(page), 'a second double click did not leave fullscreen')
+        assert.deepEqual(errors, [], 'the page threw errors')
+      }
+      finally {
+        await context.close()
+      }
+    })
+
+    test('without the Fullscreen API (iPhone Safari) double click changes nothing', async () => {
+      const vw = 844
+      const context = await browser.newContext({ viewport: { width: vw, height: 390 }, isMobile: true, hasTouch: true })
+      try {
+        await context.addInitScript(() => {
+          for (const k of ['requestFullscreen', 'webkitRequestFullscreen'])
+            delete Element.prototype[k]
+          for (const k of ['exitFullscreen', 'webkitExitFullscreen'])
+            delete Document.prototype[k]
+        })
+        const page = await context.newPage()
+        const errors = []
+        page.on('pageerror', e => errors.push(e.message))
+        await page.goto(pathToFileURL(join(deck, 'slides-export.html')).href)
+        await page.mouse.dblclick(vw / 2, 195)
+        await page.keyboard.press('ArrowRight')
+        assert.ok(near(await scrollsTo(page, vw), vw), 'ArrowRight did not move one slide after a double click')
+        assert.ok(!await fullscreen(page), 'entered fullscreen without the Fullscreen API')
+        assert.deepEqual(errors, [], 'the page threw errors')
       }
       finally {
         await context.close()

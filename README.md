@@ -143,17 +143,19 @@ pasos. Mermaid queda para los diagramas grandes o de tipos especiales
 ### Compartir la presentación
 
 `npm run export:html` genera `slides-export.html`: la presentación como
-HTML + CSS, sin JavaScript, en un único archivo que cualquiera abre con doble
-clic en su navegador, sin Node y sin servidor. También se abre en el iPhone o
+HTML + CSS en un único archivo que cualquiera abre con doble clic en su
+navegador, sin Node y sin servidor. También se abre en el iPhone o
 el iPad desde la vista previa de archivos (app Archivos, AirDrop), que no
 ejecuta JavaScript; ahí necesita iOS 16 o posterior. Las imágenes de `public/`
 van dentro del archivo, y las fuentes de Google necesitan conexión (sin ella
 se usa una fuente del sistema).
 
 Se ve como una presentación: una slide por pantalla, escalada para caber
-entera, y pasas a la siguiente con un swipe lateral (← → en la compu). Las
-slides son 16:9, así que con el teléfono vertical quedan franjas negras arriba
-y abajo: gíralo. En la compu la rueda vertical del mouse no avanza. Los clicks
+entera, y pasas a la siguiente con un swipe lateral (← → en la compu). En la
+compu, doble clic pone la pantalla completa y Esc la quita; es el único
+JavaScript del archivo y en el iPhone no hace nada. Las slides son 16:9, así
+que con el teléfono vertical quedan franjas negras arriba y abajo: gíralo. En
+la compu la rueda vertical del mouse no avanza. Los clicks
 salen ya revelados y las animaciones en loop se mueven; lo que dependa de
 JavaScript (contadores, efectos hechos con código) sale quieto, y no hay
 transiciones entre slides. Por eso el plugin hace los loops con CSS y te
@@ -349,8 +351,8 @@ Haz estas pruebas en orden, en cada agente, con `playground/` vacía:
 | 4 | *"Pon la diapo 3 a dos columnas"* | Usa `layout: two-cols` con `::right::` |
 | 5 | *"De ahora en adelante quiero modo oscuro"* | Actualiza la línea en `AGENTS.md` |
 | 6 | *"Hazme otra presentación sobre Docker"* | No pregunta preferencias (ya existen) y pregunta antes de sobrescribir `slides.md` |
-| 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic en la compu | Abre sin servidor, con imágenes; cada slide llena la ventana sin cortarse, ← → pasan de a una slide y los loops se mueven |
-| 8 | Pasar ese `slides-export.html` al iPhone (AirDrop o Archivos) | Abre en la vista previa, los clicks salen revelados y los loops se mueven; en horizontal cada slide llena la pantalla sin cortarse; el swipe lateral pasa de a una slide; en la compu ← → también |
+| 7 | `npm run export:html` (tú) y abrir `slides-export.html` con doble clic en la compu | Abre sin servidor, con imágenes; cada slide llena la ventana sin cortarse, ← → pasan de a una slide y los loops se mueven; doble clic pone la pantalla completa sin cambiar de slide, ← → siguen andando y Esc la quita |
+| 8 | Pasar ese `slides-export.html` al iPhone (AirDrop o Archivos) | Abre en la vista previa, los clicks salen revelados y los loops se mueven; en horizontal cada slide llena la pantalla sin cortarse; el swipe lateral pasa de a una slide; un doble toque no rompe nada; en la compu ← → también |
 | 9 | *"Añade un diagrama del flujo de login"* | Diagrama HTML/SVG con flechas en loop; con animaciones en loop sale completo desde el inicio, con clicks o variadas se revela por pasos; en el PDF sale completo y quieto |
 | 10 | Con el MCP de Figma conectado: *"Usa los colores y el logo de este Figma: <link a un frame>"* | Guarda el logo en `public/`, aplica los colores en el deck (no crea nada en Figma) y ofrece guardarlos en `AGENTS.md` |
 | 11 | La misma petición sin el MCP de Figma | Avisa en una línea que no puede leer Figma y sigue sin él |
@@ -368,9 +370,12 @@ SLIDES_TEST_DECK=/tmp/deck-html node --test tests/export-html.test.mjs   # reuti
 
 Abre el HTML con JavaScript apagado en WebKit y Chromium, como teléfono en
 horizontal (844×390) y como escritorio (1440×900), y comprueba que la slide
-llena la pantalla sin salirse y que dos → la dejan en la slide 3. No cubre el
-teléfono vertical, el swipe ni la vista previa real del iPhone: eso sigue en la
-fila 8.
+llena la pantalla sin salirse y que dos → la dejan en la slide 3. Con
+JavaScript encendido comprueba que el doble clic entra y sale de pantalla
+completa sin mover la slide, y que sin la API de pantalla completa (Safari del
+iPhone) no hace nada. No cubre Esc (en Chromium sin ventana no hay quién lo
+atienda), el teléfono vertical, el swipe ni la vista previa real del iPhone:
+eso sigue en las filas 7 y 8.
 
 ### 4. Probar las preferencias globales
 

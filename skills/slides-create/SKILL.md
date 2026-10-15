@@ -129,10 +129,10 @@ to save the answer in **Animaciones:** (see
 [`../slides-preferences/SKILL.md`](../slides-preferences/SKILL.md)).
 
 Write the loops without JavaScript. `npm run export:html` turns the deck into
-`slides-export.html`, HTML + CSS without JavaScript, the file the user shares:
-it opens in any browser and in the iPhone's file preview, one slide per
-screen, scaled to fit, swiped sideways. CSS and SMIL animations keep moving
-there; anything driven by JavaScript stays still. So:
+`slides-export.html`, HTML + CSS without the deck's JavaScript, the file the
+user shares: it opens in any browser and in the iPhone's file preview, one
+slide per screen, scaled to fit, swiped sideways. CSS and SMIL animations keep
+moving there; anything driven by JavaScript stays still. So:
 
 - **CSS first**: `@keyframes` in a slide's `<style>` or UnoCSS
   `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`, for
@@ -249,14 +249,15 @@ npm run build      # genera un sitio estático en dist/
 ```
 
 `slides-export.html` is the way to share the deck with someone who has no
-Node: HTML + CSS without JavaScript, in one file that opens from disk in any
-browser, with no server, and in the iPhone/iPad file preview (Files app,
-AirDrop). Clicks come out already revealed and CSS loops keep moving; one
+Node: HTML + CSS in one file that opens from disk in any browser, with no
+server, and in the iPhone/iPad file preview (Files app, AirDrop), which runs
+no JavaScript. Clicks come out already revealed and CSS loops keep moving; one
 slide per screen, scaled to fit, and a sideways swipe moves to the next one
-(← → on a computer). On a phone held upright the 16:9 slides leave black
-bands, so suggest turning it sideways; on a computer the vertical mouse wheel
-does not advance. Images in `public/` are embedded in the file; images loaded
-by URL still need internet.
+(← → on a computer). On a computer a double click toggles fullscreen and Esc
+leaves it; on the iPhone that does nothing. On a phone held upright the 16:9
+slides leave black bands, so suggest turning it sideways; on a computer the
+vertical mouse wheel does not advance. Images in `public/` are embedded in the
+file; images loaded by URL still need internet.
 
 Mention they can now ask for changes in plain language ("cambia la diapo 4
 a dos columnas") without naming the plugin.

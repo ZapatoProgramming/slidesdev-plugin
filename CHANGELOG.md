@@ -6,6 +6,11 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-14
+
+### Added
+- `slides-export.html` pone la pantalla completa con doble clic; Esc (o otro doble clic) la quita. Es su único JavaScript: un script mínimo que no toca el layout, así que la vista previa del iPhone, que no ejecuta JavaScript, la muestra igual que antes, y en Safari del iPhone, que no tiene pantalla completa, no hace nada. `tests/export-html.test.mjs` comprueba con JavaScript encendido que el doble clic entra y sale sin mover la slide ni dejar texto seleccionado, que ← → siguen andando, y que sin la API de pantalla completa no pasa nada ni hay errores.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added
